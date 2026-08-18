@@ -13,31 +13,30 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
+      with:
+        submodules: recursive
 
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
         python-version: '3.11'
 
-    # 1. Pobranie prekompilowanych bibliotek Blendera dla Windows 64-bit
-    - name: Checkout Blender Win64 Libraries
-      run: |
-        git clone --depth 1 https://projects.blender.org/blender/blender-assets.git lib/win64_vc15
-
-    # 2. Uruchomienie Twojego patchera przed kompilacją
+    # 1. Uruchomienie Twojego patchera przed kompilacją
     - name: Run Patch and Prepare Files
       run: |
         cd PrepareFiles
         python patch_and_compile.py
 
-    # 3. Kompilacja Blendera przy użyciu oficjalnego buildsystemu Blendera
-    - name: Build Blender (Windows)
+    # 2. Pobranie zależy i kompilacja przez make.bat
+    - name: Download Blender Dependencies & Build
       working-directory: blender-main/blender
-      run: cmd.exe /c make.bat release
+      run: |
+        cmd.exe /c "make.bat update"
+        cmd.exe /c "make.bat release"
 
-    # 4. Spakowanie i udostępnienie artefaktu (całego folderu bin)
+    # 3. Spakowanie i udostępnienie artefaktu (sprawdzona ścieżka wyjściowa Blendera)
     - name: Upload Blender Artifact
       uses: actions/upload-artifact@v4
       with:
         name: Blender-MCP-Windows
-        path: ../build_windows_Full_x64_vc16_Release/bin/Release/*
+        path: blender-main/build_windows_Release_x64_vc*_Release/bin/Release/**
