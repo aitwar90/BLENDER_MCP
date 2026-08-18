@@ -1,4 +1,4 @@
-name: Build Windows EXE
+name: Build Blender Windows
 
 on:
   push:
@@ -11,23 +11,34 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    # 1. Pobranie kodu źródłowego z Twojego repozytorium
     - name: Checkout repository
       uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
       with:
-        submodules: recursive # Jeśli używasz podmodułów
+        python-version: '3.11'
 
-    # 2. Konfiguracja CMake
-    - name: Configure CMake
-      run: cmake -B build -DCMAKE_BUILD_TYPE=Release
+    # 1. Pobranie prekompilowanych bibliotek Blendera dla Windows 64-bit
+    - name: Checkout Blender Win64 Libraries
+      run: |
+        git clone --depth 1 https://projects.blender.org/blender/blender-assets.git lib/win64_vc15
 
-    # 3. Kompilacja projektu
-    - name: Build Project
-      run: cmake --build build --config Release
+    # 2. Uruchomienie Twojego patchera przed kompilacją
+    - name: Run Patch and Prepare Files
+      run: |
+        cd PrepareFiles
+        python patch_and_compile.py
 
-    # 4. Zapisanie wygenerowanego pliku .exe jako artefakt do pobrania
-    - name: Upload EXE Artifact
+    # 3. Kompilacja Blendera przy użyciu oficjalnego buildsystemu Blendera
+    - name: Build Blender
+      run: |
+        cd blender-main
+        .\make.bat release
+
+    # 4. Spakowanie i udostępnienie artefaktu (całego folderu bin)
+    - name: Upload Blender Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: MyCompiledApp-Windows
-        path: build/Release/*.exe
+        name: Blender-MCP-Windows
+        path: ../build_windows_Full_x64_vc16_Release/bin/Release/*

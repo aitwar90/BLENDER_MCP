@@ -4,11 +4,18 @@ import shutil
 import subprocess
 import re
 
-BLENDER_ROOT = "/media/aitwarcl/b6fec136-6fdf-43ec-aa0e-0c5f6a0afa37/BlenderRepo/blender_proj/BLENDER_MCP/blender-main/blender"
+# Dynamiczne wyznaczanie ścieżek (działa na Linuksie i w GitHub Actions na Windowsie)
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = os.path.dirname(SCRIPT_DIR)
+
+BLENDER_ROOT = os.path.join(BASE_DIR, "blender-main", "blender")
 TARGET_DIR = os.path.join(BLENDER_ROOT, "source/blender/editors/sculpt_paint")
 
-LOCAL_WRAPPER = "paint_mcp.cc"
-LOCAL_ADDON_DIR = "multi_painter"
+LOCAL_WRAPPER_NAME = "paint_mcp.cc"
+LOCAL_WRAPPER_SRC = os.path.join(SCRIPT_DIR, LOCAL_WRAPPER_NAME)
+
+LOCAL_ADDON_NAME = "multi_painter"
+LOCAL_ADDON_SRC = os.path.join(SCRIPT_DIR, LOCAL_ADDON_NAME)
 
 
 def reset_git_files():
@@ -38,6 +45,10 @@ def reset_git_files():
 def patch_paint_proj():
     proj_path = os.path.join(TARGET_DIR, "mesh/paint_image_proj.cc")
     print(f"[MCP] Patchowanie: {proj_path}")
+
+    if not os.path.exists(proj_path):
+        print(f"  -> BŁĄD: Plik nie istnieje pod ścieżką {proj_path}")
+        return False
 
     with open(proj_path, "r", encoding="utf-8") as f:
         content = f.read()
@@ -70,12 +81,10 @@ extern "C" {
     replacement_prep = """  /* 2. Wstrzyknięcie kanałów MCP PO zebraniu siatki, żeby dopisać je na koniec listy used_images */
   if (mcp_is_enabled(nullptr)) {
     mcp_inject_images(nullptr, &used_images, &ps->image_tot);
-    //printf("[MCP DEBUG] Po wstrzyknieciu MCP, finalne image_tot = %d\\n", ps->image_tot);
   }
 
   /* 3. Alokacja buforów dla wszystkich obrazów (w tym MCP) */
   if (ps->is_shared_user == false) {
-    //printf("[MCP DEBUG] ps->is_shared_user = false czyli co? \\n");
     project_paint_build_proj_ima(ps, arena, &used_images);
   }"""
 
@@ -85,7 +94,7 @@ extern "C" {
         print("  -> BŁĄD: Nie znaleziono punktu wywołania project_paint_build_proj_ima!")
         return False
 
-    # 3. Bezpieczny replacement bez zjadania funkcji – dopasowanie po ścisłej strukturze
+    # 3. Bezpieczny replacement bloku default
     pattern_thread = (
         r"default:\s*\n?"
         r"\s*if\s*\(\s*is_floatbuf\s*\)\s*\{\s*\n?"
@@ -168,11 +177,15 @@ extern "C" {
 
 def patch_cmake():
     cmake_path = os.path.join(TARGET_DIR, "CMakeLists.txt")
+    if not os.path.exists(cmake_path):
+        print(f"  -> BŁĄD: CMakeLists.txt nie istnieje pod {cmake_path}")
+        return False
+
     with open(cmake_path, "r", encoding="utf-8") as f:
         content = f.read()
     anchor = "paint_curve.cc"
-    if anchor in content and LOCAL_WRAPPER not in content:
-        content = content.replace(anchor, f"{anchor}\n  {LOCAL_WRAPPER}", 1)
+    if anchor in content and LOCAL_WRAPPER_NAME not in content:
+        content = content.replace(anchor, f"{anchor}\n  {LOCAL_WRAPPER_NAME}", 1)
         with open(cmake_path, "w", encoding="utf-8") as f:
             f.write(content)
         print("  -> Dodano paint_mcp.cc do CMakeLists.txt")
@@ -182,14 +195,15 @@ def patch_cmake():
 
 def deploy_python_addon():
     addons_target_path = os.path.join(
-        BLENDER_ROOT, "release", "scripts", "addons", LOCAL_ADDON_DIR
+        BLENDER_ROOT, "release", "scripts", "addons", LOCAL_ADDON_NAME
     )
-    if not os.path.exists(LOCAL_ADDON_DIR):
+    if not os.path.exists(LOCAL_ADDON_SRC):
+        print(f"  -> Brak katalogu addonu pod {LOCAL_ADDON_SRC}, pomijam.")
         return True
     try:
         if os.path.exists(addons_target_path):
             shutil.rmtree(addons_target_path)
-        shutil.copytree(LOCAL_ADDON_DIR, addons_target_path)
+        shutil.copytree(LOCAL_ADDON_SRC, addons_target_path)
         print("  -> Addon skopiowany pomyślnie!")
         return True
     except Exception as e:
@@ -201,24 +215,17 @@ def main():
     print("=== [MCP BUILD & HOOK SYSTEM] ===")
     reset_git_files()
 
-    dest_wrapper = os.path.join(TARGET_DIR, LOCAL_WRAPPER)
-    if os.path.exists(LOCAL_WRAPPER):
-        shutil.copyfile(LOCAL_WRAPPER, dest_wrapper)
+    dest_wrapper = os.path.join(TARGET_DIR, LOCAL_WRAPPER_NAME)
+    if os.path.exists(LOCAL_WRAPPER_SRC):
+        shutil.copyfile(LOCAL_WRAPPER_SRC, dest_wrapper)
+        print(f"  -> Skopiowano wrapper: {LOCAL_WRAPPER_NAME}")
 
     if not patch_cmake() or not patch_paint_proj():
         print("\n[MCP] Błąd patchowania. Przerywam.")
-        return
+        exit(1)
 
     deploy_python_addon()
-
-    print("\n[MCP] Uruchamiam kompilację (make)...")
-    try:
-        jobs = f"-j{os.cpu_count() or 4}"
-        result = subprocess.run(["make", jobs], cwd=BLENDER_ROOT)
-        if result.returncode == 0:
-            print("\n=== [SUKCES] Kompilacja gotowa! ===")
-    except Exception as e:
-        print(f"\n[MCP] Błąd uruchomienia make: {e}")
+    print("\n=== [SUKCES] Patchowanie zakończone pomyślnie! ===")
 
 
 if __name__ == "__main__":
