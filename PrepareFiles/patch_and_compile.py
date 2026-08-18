@@ -3,6 +3,7 @@ import os
 import shutil
 import subprocess
 import re
+import sys
 
 # Dynamiczne wyznaczanie ścieżek (działa na Linuksie i w GitHub Actions na Windowsie)
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -47,13 +48,16 @@ def patch_paint_proj():
     print(f"[MCP] Patchowanie: {proj_path}")
 
     if not os.path.exists(proj_path):
-        print(f"  -> BŁĄD: Plik nie istnieje pod ścieżką {proj_path}")
+        print(f"  -> BLAD: Plik nie istnieje pod sciezka {proj_path}")
         return False
 
     with open(proj_path, "r", encoding="utf-8") as f:
         content = f.read()
 
-    # 1. Jawne deklaracje typów w przestrzeni blender::
+    # Normalizacja koncowek linii dla Windowsa (CRLF -> LF)
+    content = content.replace("\r\n", "\n")
+
+    # 1. Deklaracja MCP
     declaration = """#include "BKE_context.hh"
 
 namespace blender {
@@ -72,29 +76,26 @@ extern "C" {
     if "mcp_get_tex_for_image" not in content:
         content = declaration + content
 
-    # 2. Patch w project_paint_prepare_all_faces
-    target_prep = """  /* Build an array of images we use. */
-  if (ps->is_shared_user == false) {
-    project_paint_build_proj_ima(ps, arena, &used_images);
-  }"""
+    # 2. Szukanie elastycznym Regexem zamiast sztywnego stringa (odporne na spatory i tabulatory)
+    pattern_prep = r"(\/\*\s*Build an array of images we use\.\s*\*\/[\s\n]*if\s*\(\s*ps->is_shared_user\s*==\s*false\s*\)\s*\{\s*[\s\n]*project_paint_build_proj_ima\(\s*ps,\s*arena,\s*&used_images\s*\);\s*\})"
 
-    replacement_prep = """  /* 2. Wstrzyknięcie kanałów MCP PO zebraniu siatki, żeby dopisać je na koniec listy used_images */
+    replacement_prep = """  /* 2. Wstrzykniecie kanalow MCP */
   if (mcp_is_enabled(nullptr)) {
     mcp_inject_images(nullptr, &used_images, &ps->image_tot);
   }
 
-  /* 3. Alokacja buforów dla wszystkich obrazów (w tym MCP) */
+  /* 3. Alokacja buforow dla wszystkich obrazow (w tym MCP) */
   if (ps->is_shared_user == false) {
     project_paint_build_proj_ima(ps, arena, &used_images);
   }"""
 
-    if target_prep in content:
-        content = content.replace(target_prep, replacement_prep, 1)
-    else:
-        print("  -> BŁĄD: Nie znaleziono punktu wywołania project_paint_build_proj_ima!")
+    new_content, count = re.subn(pattern_prep, replacement_prep, content, count=1)
+    if count == 0:
+        print("  -> BLAD: Nie znaleziono punktu wywolania project_paint_build_proj_ima!")
         return False
+    content = new_content
 
-    # 3. Bezpieczny replacement bloku default
+    # 3. Patch bloku default
     pattern_thread = (
         r"default:\s*\n?"
         r"\s*if\s*\(\s*is_floatbuf\s*\)\s*\{\s*\n?"
@@ -169,10 +170,10 @@ extern "C" {
     if count > 0:
         with open(proj_path, "w", encoding="utf-8") as f:
             f.write(new_content)
-        print("  -> Pomyślnie zapatczowano paint_image_proj.cc!")
+        print("  -> Pomyslnie zapatczowano paint_image_proj.cc!")
         return True
 
-    print("  -> BŁĄD: Nie znaleziono bloku default w do_projectpaint_thread!")
+    print("  -> BLAD: Nie znaleziono bloku default w do_projectpaint_thread!")
     return False
 
 def patch_cmake():
@@ -213,6 +214,9 @@ def deploy_python_addon():
 
 def main():
     print("=== [MCP BUILD & HOOK SYSTEM] ===")
+    if sys.platform == "win32":
+        sys.stdout.reconfigure(encoding='utf-8')
+    
     reset_git_files()
 
     dest_wrapper = os.path.join(TARGET_DIR, LOCAL_WRAPPER_NAME)
