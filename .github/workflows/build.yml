@@ -21,24 +21,24 @@ jobs:
       with:
         python-version: '3.11'
 
-    # 1. Pobranie prekompilowanych bibliotek dla Windowsa bezpośrednio z oficjalnego repo Blendera
+    # 1. Pobranie bibliotek bezpośrednio tam, gdzie check_libraries.cmd ich szuka
     - name: Download Blender Win64 Libraries
       run: |
         git clone --depth 1 https://projects.blender.org/blender/lib-windows_x64.git blender-main/lib/windows_x64
 
-    # 2. Uruchomienie Twojego patchera przed kompilacją
+    # 2. Modyfikacja kodu (Twój patcher)
     - name: Run Patch and Prepare Files
       run: |
         cd PrepareFiles
         python patch_and_compile.py
 
-    # 3. Kompilacja Blendera
+    # 3. Kompilacja bez zbędnego 'make.bat update'
     - name: Build Blender
       working-directory: blender-main/blender
       run: |
         cmd.exe /c "make.bat release"
 
-    # 4. Spakowanie i udostępnienie artefaktu
+    # 4. Artefakt
     - name: Upload Blender Artifact
       uses: actions/upload-artifact@v4
       with:
