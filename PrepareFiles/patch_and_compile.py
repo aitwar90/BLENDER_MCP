@@ -20,6 +20,11 @@ LOCAL_ADDON_SRC = os.path.join(SCRIPT_DIR, LOCAL_ADDON_NAME)
 
 
 def reset_git_files():
+    git_dir = os.path.join(BLENDER_ROOT, ".git")
+    if not os.path.exists(git_dir):
+        print("[MCP] Brak repozytorium Git w katalogu Blendera. Pomijam resetowanie plikow.")
+        return
+    
     print("[MCP] Przywracanie czystego stanu z Git...")
     files_to_reset = [
         os.path.join(TARGET_DIR, "CMakeLists.txt"),
@@ -43,6 +48,7 @@ def reset_git_files():
             except Exception as e:
                 print(f"  -> [BLAD GIT] {os.path.basename(file_path)}: {e}")
 
+
 def patch_paint_proj():
     proj_path = os.path.join(TARGET_DIR, "mesh/paint_image_proj.cc")
     print(f"[MCP] Patchowanie: {proj_path}")
@@ -54,29 +60,37 @@ def patch_paint_proj():
     with open(proj_path, "r", encoding="utf-8") as f:
         content = f.read()
 
-    # Normalizacja koncowek linii dla Windowsa (CRLF -> LF)
+    # Normalizacja koncowek linii (CRLF -> LF)
     content = content.replace("\r\n", "\n")
 
-    # 1. Deklaracja MCP
-    declaration = """#include "BKE_context.hh"
+    # Sygnatura sprawdzajaca, czy plik zawiera juz nasze modyfikacje
+    MCP_MARKER = "/* MCP_PATCH_APPLIED */"
 
-namespace blender {
+    if MCP_MARKER in content:
+        print("  -> INFO: Poprawki MCP sa juz nalozone na paint_image_proj.cc. Pomijam.")
+        return True
+
+    # 1. Deklaracja MCP
+    declaration = f"""{MCP_MARKER}
+#include "BKE_context.hh"
+
+namespace blender {{
 struct Image;
 struct Tex;
-}
+}}
 
-extern "C" {
+extern "C" {{
   bool mcp_is_enabled(const blender::bContext *C);
   void mcp_inject_images(const blender::bContext *C, void *used_images_ptr, int *image_tot_ptr);
   bool mcp_get_slot_data(
     int channel_index, int slot_index, blender::Image **out_target_img, blender::Tex **out_source_tex);
   bool mcp_get_tex_for_image(int channel_index, blender::Image *target_img, blender::Tex **out_source_tex);
-}
+}}
 """
     if "mcp_get_tex_for_image" not in content:
         content = declaration + content
 
-    # 2. Bardzo elastyczne szukanie miejsca wywolania project_paint_build_proj_ima
+    # 2. Szukanie miejsca wywolania project_paint_build_proj_ima
     pattern_prep = r"(if\s*\(\s*ps->is_shared_user\s*==\s*false\s*\)\s*\{\s*project_paint_build_proj_ima\(\s*ps,\s*arena,\s*&used_images\s*\);\s*\})"
 
     replacement_prep = """  /* 2. Wstrzykniecie kanalow MCP */
@@ -84,14 +98,14 @@ extern "C" {
     mcp_inject_images(nullptr, &used_images, &ps->image_tot);
   }
 
-  /* 3. Alokacja buforow dla wszystkich obrazow (w tim MCP) */
+  /* 3. Alokacja buforow dla wszystkich obrazow (w tym MCP) */
   if (ps->is_shared_user == false) {
     project_paint_build_proj_ima(ps, arena, &used_images);
   }"""
 
-    new_content, count = re.subn(pattern_prep, replacement_prep, content, count=1)
-    if count == 0:
-        print("  -> BLAD: Nie znaleziono punktu wywolania project_paint_build_proj_ima!")
+    new_content, count_prep = re.subn(pattern_prep, replacement_prep, content, count=1)
+    if count_prep == 0:
+        print("  -> BLAD: Brak wzorca dla project_paint_build_proj_ima w kodzie Blendera!")
         return False
     content = new_content
 
@@ -166,15 +180,16 @@ extern "C" {
                   }
                   break;"""
 
-    new_content, count = re.subn(pattern_thread, replacement_thread, content, count=1)
-    if count > 0:
-        with open(proj_path, "w", encoding="utf-8") as f:
-            f.write(new_content)
-        print("  -> Pomyslnie zapatczowano paint_image_proj.cc!")
-        return True
+    new_content, count_thread = re.subn(pattern_thread, replacement_thread, content, count=1)
+    if count_thread == 0:
+        print("  -> BLAD: Brak bloku default w do_projectpaint_thread w kodzie Blendera!")
+        return False
 
-    print("  -> BLAD: Nie znaleziono bloku default w do_projectpaint_thread!")
-    return False
+    with open(proj_path, "w", encoding="utf-8") as f:
+        f.write(new_content)
+    print("  -> Pomyslnie zapatczowano paint_image_proj.cc!")
+    return True
+
 
 def patch_cmake():
     cmake_path = os.path.join(TARGET_DIR, "CMakeLists.txt")
@@ -184,14 +199,21 @@ def patch_cmake():
 
     with open(cmake_path, "r", encoding="utf-8") as f:
         content = f.read()
+
+    if LOCAL_WRAPPER_NAME in content:
+        print("  -> INFO: paint_mcp.cc znajduje sie juz w CMakeLists.txt. Pomijam.")
+        return True
+
     anchor = "paint_curve.cc"
-    if anchor in content and LOCAL_WRAPPER_NAME not in content:
+    if anchor in content:
         content = content.replace(anchor, f"{anchor}\n  {LOCAL_WRAPPER_NAME}", 1)
         with open(cmake_path, "w", encoding="utf-8") as f:
             f.write(content)
         print("  -> Dodano paint_mcp.cc do CMakeLists.txt")
         return True
-    return True
+
+    print(f"  -> BLAD: Nie znaleziono kotwicy '{anchor}' w CMakeLists.txt!")
+    return False
 
 
 def deploy_python_addon():
@@ -199,7 +221,7 @@ def deploy_python_addon():
         BLENDER_ROOT, "release", "scripts", "addons", LOCAL_ADDON_NAME
     )
     if not os.path.exists(LOCAL_ADDON_SRC):
-        print(f"  -> Brak katalogu addonu pod {LOCAL_ADDON_SRC}, pomijam.")
+        print(f"  -> OSTRZEZENIE: Brak katalogu zrodlowego addonu pod {LOCAL_ADDON_SRC}, pomijam.")
         return True
     try:
         if os.path.exists(addons_target_path):
@@ -209,6 +231,22 @@ def deploy_python_addon():
         return True
     except Exception as e:
         print(f"  -> BLAD kopiowania addonu: {e}")
+        return False
+
+
+def compile_blender_linux():
+    print("\n[MCP] Wykryto system Linux. Uruchamianie kompilacji (make)...")
+    try:
+        cmd = ["make", "-C", BLENDER_ROOT]
+        print(f"  -> Wykonywanie: {' '.join(cmd)}")
+        res = subprocess.run(cmd)
+        if res.returncode != 0:
+            print("\n[MCP BLAD] Kompilacja na Linuksie zakonczona niepowodzeniem!")
+            return False
+        print("\n[MCP] Kompilacja zakonczona sukcesem!")
+        return True
+    except Exception as e:
+        print(f"\n[MCP BLAD] Nie udalo sie uruchomic procesu kompilacji: {e}")
         return False
 
 
@@ -226,14 +264,26 @@ def main():
     dest_wrapper = os.path.join(TARGET_DIR, LOCAL_WRAPPER_NAME)
     if os.path.exists(LOCAL_WRAPPER_SRC):
         shutil.copyfile(LOCAL_WRAPPER_SRC, dest_wrapper)
-        print(f"  -> Skopiowano wrapper: {LOCAL_WRAPPER_NAME}")
+        print(f"  -> Skopiowano/nadpisano wrapper: {LOCAL_WRAPPER_NAME}")
+    else:
+        print(f"  -> BLAD: Brak pliku zrodlowego wrappera pod {LOCAL_WRAPPER_SRC}!")
+        sys.exit(1)
 
-    if not patch_cmake() or not patch_paint_proj():
-        print("\n[MCP] Blad patchowania. Przerywam.")
+    cmake_ok = patch_cmake()
+    proj_ok = patch_paint_proj()
+
+    if not cmake_ok or not proj_ok:
+        print("\n[MCP] Blad patchowania - nie udalo sie nalozyc modyfikacji. Przerywam.")
         sys.exit(1)
 
     deploy_python_addon()
-    print("\n=== [SUKCES] Patchowanie zakonczone pomyslnie! ===")
+
+    # Dedykowany krok kompilacji dla środowiska Linux
+    if sys.platform.startswith("linux"):
+        if not compile_blender_linux():
+            sys.exit(1)
+
+    print("\n=== [SUKCES] Proces zakonczony pomyslnie! ===")
 
 
 if __name__ == "__main__":

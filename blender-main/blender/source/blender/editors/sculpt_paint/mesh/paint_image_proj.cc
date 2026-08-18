@@ -1,3 +1,4 @@
+/* MCP_PATCH_APPLIED */
 #include "BKE_context.hh"
 
 namespace blender {
@@ -4686,15 +4687,14 @@ static void project_paint_prepare_all_faces(ProjPaintState *ps,
     }
   }
 
-  /* 2. Wstrzyknięcie kanałów MCP PO zebraniu siatki, żeby dopisać je na koniec listy used_images */
+  /* Build an array of images we use. */
+    /* 2. Wstrzykniecie kanalow MCP */
   if (mcp_is_enabled(nullptr)) {
     mcp_inject_images(nullptr, &used_images, &ps->image_tot);
-    printf("[MCP DEBUG] Po wstrzyknieciu MCP, finalne image_tot = %d\n", ps->image_tot);
   }
 
-  /* 3. Alokacja buforów dla wszystkich obrazów (w tym MCP) */
+  /* 3. Alokacja buforow dla wszystkich obrazow (w tym MCP) */
   if (ps->is_shared_user == false) {
-    printf("[MCP DEBUG] ps->is_shared_user = false czyli co? \n");
     project_paint_build_proj_ima(ps, arena, &used_images);
   }
 
