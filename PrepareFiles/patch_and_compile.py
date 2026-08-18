@@ -5,7 +5,7 @@ import subprocess
 import re
 import sys
 
-# Dynamiczne wyznaczanie ścieżek (działa na Linuksie i w GitHub Actions na Windowsie)
+# Dynamiczne wyznaczanie sciezek
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE_DIR = os.path.dirname(SCRIPT_DIR)
 
@@ -39,9 +39,9 @@ def reset_git_files():
                     check=True,
                     capture_output=True,
                 )
-                print(f"  -> Przywrócono: {os.path.basename(file_path)}")
+                print(f"  -> Przywrocono: {os.path.basename(file_path)}")
             except Exception as e:
-                print(f"  -> [BŁĄD GIT] {os.path.basename(file_path)}: {e}")
+                print(f"  -> [BLAD GIT] {os.path.basename(file_path)}: {e}")
 
 def patch_paint_proj():
     proj_path = os.path.join(TARGET_DIR, "mesh/paint_image_proj.cc")
@@ -76,15 +76,15 @@ extern "C" {
     if "mcp_get_tex_for_image" not in content:
         content = declaration + content
 
-    # 2. Szukanie elastycznym Regexem zamiast sztywnego stringa (odporne na spatory i tabulatory)
-    pattern_prep = r"(\/\*\s*Build an array of images we use\.\s*\*\/[\s\n]*if\s*\(\s*ps->is_shared_user\s*==\s*false\s*\)\s*\{\s*[\s\n]*project_paint_build_proj_ima\(\s*ps,\s*arena,\s*&used_images\s*\);\s*\})"
+    # 2. Bardzo elastyczne szukanie miejsca wywolania project_paint_build_proj_ima
+    pattern_prep = r"(if\s*\(\s*ps->is_shared_user\s*==\s*false\s*\)\s*\{\s*project_paint_build_proj_ima\(\s*ps,\s*arena,\s*&used_images\s*\);\s*\})"
 
     replacement_prep = """  /* 2. Wstrzykniecie kanalow MCP */
   if (mcp_is_enabled(nullptr)) {
     mcp_inject_images(nullptr, &used_images, &ps->image_tot);
   }
 
-  /* 3. Alokacja buforow dla wszystkich obrazow (w tym MCP) */
+  /* 3. Alokacja buforow dla wszystkich obrazow (w tim MCP) */
   if (ps->is_shared_user == false) {
     project_paint_build_proj_ima(ps, arena, &used_images);
   }"""
@@ -179,7 +179,7 @@ extern "C" {
 def patch_cmake():
     cmake_path = os.path.join(TARGET_DIR, "CMakeLists.txt")
     if not os.path.exists(cmake_path):
-        print(f"  -> BŁĄD: CMakeLists.txt nie istnieje pod {cmake_path}")
+        print(f"  -> BLAD: CMakeLists.txt nie istnieje pod {cmake_path}")
         return False
 
     with open(cmake_path, "r", encoding="utf-8") as f:
@@ -205,17 +205,21 @@ def deploy_python_addon():
         if os.path.exists(addons_target_path):
             shutil.rmtree(addons_target_path)
         shutil.copytree(LOCAL_ADDON_SRC, addons_target_path)
-        print("  -> Addon skopiowany pomyślnie!")
+        print("  -> Addon skopiowany pomyslnie!")
         return True
     except Exception as e:
-        print(f"  -> BŁĄD kopiowania addonu: {e}")
+        print(f"  -> BLAD kopiowania addonu: {e}")
         return False
 
 
 def main():
-    print("=== [MCP BUILD & HOOK SYSTEM] ===")
     if sys.platform == "win32":
-        sys.stdout.reconfigure(encoding='utf-8')
+        try:
+            sys.stdout.reconfigure(encoding='utf-8')
+        except Exception:
+            pass
+
+    print("=== [MCP BUILD & HOOK SYSTEM] ===")
     
     reset_git_files()
 
@@ -225,11 +229,11 @@ def main():
         print(f"  -> Skopiowano wrapper: {LOCAL_WRAPPER_NAME}")
 
     if not patch_cmake() or not patch_paint_proj():
-        print("\n[MCP] Błąd patchowania. Przerywam.")
-        exit(1)
+        print("\n[MCP] Blad patchowania. Przerywam.")
+        sys.exit(1)
 
     deploy_python_addon()
-    print("\n=== [SUKCES] Patchowanie zakończone pomyślnie! ===")
+    print("\n=== [SUKCES] Patchowanie zakonczone pomyslnie! ===")
 
 
 if __name__ == "__main__":
