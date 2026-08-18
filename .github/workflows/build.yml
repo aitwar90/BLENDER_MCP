@@ -31,10 +31,9 @@ jobs:
         python patch_and_compile.py
 
     # 3. Kompilacja Blendera przy użyciu oficjalnego buildsystemu Blendera
-    - name: Build Blender
-      run: |
-        cd blender-main
-        .\make.bat release
+    - name: Build Blender (Windows)
+      working-directory: blender-main/blender
+      run: cmd.exe /c make.bat release
 
     # 4. Spakowanie i udostępnienie artefaktu (całego folderu bin)
     - name: Upload Blender Artifact
