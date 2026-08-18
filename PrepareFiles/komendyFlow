@@ -1,0 +1,1179 @@
+aitwarcl@aitwarcl:/media/aitwarcl/b6fec136-6fdf-43ec-aa0e-0c5f6a0afa37/BlenderRepo/blender-main/blender$ grep -rn "struct PaintStroke" source/blender/editors/sculpt_paint/
+source/blender/editors/sculpt_paint/paint_intern.hh:65:struct PaintStroke;
+source/blender/editors/sculpt_paint/paint_intern.hh:108:struct PaintStroke : NonCopyable, NonMovable {
+
+aitwarcl@aitwarcl:/media/aitwarcl/b6fec136-6fdf-43ec-aa0e-0c5f6a0afa37/BlenderRepo/blender-main/blender$ grep -rn "paint_stroke_step" source/blender/editors/sculpt_paint/
+aitwarcl@aitwarcl:/media/aitwarcl/b6fec136-6fdf-43ec-aa0e-0c5f6a0afa37/BlenderRepo/blender-main/blender$ 
+
+aitwarcl@aitwarcl:/media/aitwarcl/b6fec136-6fdf-43ec-aa0e-0c5f6a0afa37/BlenderRepo/blender-main/blender$ grep -rn "paint_stroke_apply" source/blender/editors/sculpt_paint/
+aitwarcl@aitwarcl:/media/aitwarcl/b6fec136-6fdf-43ec-aa0e-0c5f6a0afa37/BlenderRepo/blender-main/blender$ 
+
+aitwarcl@aitwarcl:/media/aitwarcl/b6fec136-6fdf-43ec-aa0e-0c5f6a0afa37/BlenderRepo/blender-main/blender$ grep -rn "paint_space_stroke" source/blender/editors/sculpt_paint/
+source/blender/editors/sculpt_paint/paint_intern.hh:310:bool paint_space_stroke_enabled(const Brush &br, PaintMode mode);
+source/blender/editors/sculpt_paint/paint_stroke.cc:606:static float paint_space_stroke_spacing(const ViewContext &vc,
+source/blender/editors/sculpt_paint/paint_stroke.cc:650:    /* Low pressure on size (with tablets) can cause infinite recursion in paint_space_stroke(),
+source/blender/editors/sculpt_paint/paint_stroke.cc:657:static float paint_space_stroke_spacing_no_pressure(const ViewContext &vc,
+source/blender/editors/sculpt_paint/paint_stroke.cc:665:  return paint_space_stroke_spacing(
+source/blender/editors/sculpt_paint/paint_stroke.cc:716:static float paint_space_stroke_spacing_variable(ViewContext &vc,
+source/blender/editors/sculpt_paint/paint_stroke.cc:731:    const float s = paint_space_stroke_spacing(
+source/blender/editors/sculpt_paint/paint_stroke.cc:741:    const float last_spacing = paint_space_stroke_spacing(
+source/blender/editors/sculpt_paint/paint_stroke.cc:743:    const float new_spacing = paint_space_stroke_spacing(
+source/blender/editors/sculpt_paint/paint_stroke.cc:750:  return paint_space_stroke_spacing(
+source/blender/editors/sculpt_paint/paint_stroke.cc:796:  const float no_pressure_spacing = paint_space_stroke_spacing_no_pressure(
+source/blender/editors/sculpt_paint/paint_stroke.cc:800:    const float spacing = paint_space_stroke_spacing_variable(this->vc,
+source/blender/editors/sculpt_paint/paint_stroke.cc:988:bool paint_space_stroke_enabled(const Brush &br, const PaintMode mode)
+source/blender/editors/sculpt_paint/paint_stroke.cc:1269:  const float no_pressure_spacing = paint_space_stroke_spacing_no_pressure(
+source/blender/editors/sculpt_paint/paint_stroke.cc:1577:        if (paint_space_stroke_enabled(*br, mode)) {
+source/blender/editors/sculpt_paint/paint_stroke.cc:1594:  if (first_dab && paint_space_stroke_enabled(*br, mode) && !(br->flag & BRUSH_SMOOTH_STROKE)) {
+
+aitwarcl@aitwarcl:/media/aitwarcl/b6fec136-6fdf-43ec-aa0e-0c5f6a0afa37/BlenderRepo/blender-main/blender$ grep -A 20 "PAINT_OT_image_paint" source/blender/editors/sculpt_paint/paint_ops.cc
+  WM_operatortype_append(PAINT_OT_image_paint);
+  WM_operatortype_append(PAINT_OT_sample_color);
+  WM_operatortype_append(PAINT_OT_grab_clone);
+  WM_operatortype_append(PAINT_OT_project_image);
+  WM_operatortype_append(PAINT_OT_image_from_view);
+  WM_operatortype_append(PAINT_OT_brush_colors_flip);
+  WM_operatortype_append(PAINT_OT_add_texture_paint_slot);
+  WM_operatortype_append(PAINT_OT_add_simple_uvs);
+
+  /* weight */
+  WM_operatortype_append(PAINT_OT_weight_paint_toggle);
+  WM_operatortype_append(PAINT_OT_weight_paint);
+  WM_operatortype_append(PAINT_OT_weight_set);
+  WM_operatortype_append(PAINT_OT_weight_from_bones);
+  WM_operatortype_append(PAINT_OT_weight_gradient);
+  WM_operatortype_append(PAINT_OT_weight_sample);
+  WM_operatortype_append(PAINT_OT_weight_sample_group);
+
+  /* uv */
+  WM_operatortype_append(SCULPT_OT_uv_sculpt_grab);
+  WM_operatortype_append(SCULPT_OT_uv_sculpt_relax);
+--
+  WM_modalkeymap_assign(keymap, "PAINT_OT_image_paint");
+
+  /* Curves Sculpt mode. */
+  keymap = WM_keymap_ensure(keyconf, "Sculpt Curves", SPACE_EMPTY, RGN_TYPE_WINDOW);
+  keymap->poll = curves_sculpt_poll;
+
+  /* sculpt expand. */
+  expand::modal_keymap(keyconf);
+}
+
+}  // namespace blender
+
+aitwarcl@aitwarcl:/media/aitwarcl/b6fec136-6fdf-43ec-aa0e-0c5f6a0afa37/BlenderRepo/blender-main/blender$ grep -rn "ED_space_image_paint" source/blender/editors/sculpt_paint/
+source/blender/editors/sculpt_paint/mesh/paint_image.cc:463:void ED_space_image_paint_update(Main *bmain, wmWindowManager *wm, Scene *scene)
+
+aitwarcl@aitwarcl:/media/aitwarcl/b6fec136-6fdf-43ec-aa0e-0c5f6a0afa37/BlenderRepo/blender-main/blender$ sed -n '108,200p' source/blender/editors/sculpt_paint/paint_intern.hh
+struct PaintStroke : NonCopyable, NonMovable {
+ public:
+  /* TODO: Temporary, used to assist removing usage of bContext in PaintStroke callbacks.
+   * See #149378 */
+  bContext *evil_C = nullptr;
+
+  /* Cached values */
+  ViewContext vc = {};
+  Depsgraph *depsgraph = nullptr;
+  Object *object = nullptr;
+  Scene *scene = nullptr;
+  Paint *paint = nullptr;
+  Brush *brush = nullptr;
+  UnifiedPaintSettings *ups = nullptr;
+
+  /* TODO: These are only public so that cursor drawing code can use them. Find a better place. */
+  float2 last_mouse_position = float2(0.0f, 0.0f);
+  bool constrain_line = false;
+  float2 constrained_pos = float2(0.0f, 0.0f);
+
+ protected:
+  std::unique_ptr<PaintModeData> mode_data_ = nullptr;
+
+ private:
+  void *stroke_cursor_ = nullptr;
+
+  wmTimer *timer_ = nullptr;
+  std::optional<RandomNumberGenerator> rng_ = std::nullopt;
+
+  /* Paint stroke can use up to PAINT_MAX_INPUT_SAMPLES prior inputs
+   * to smooth the stroke */
+  PaintSample samples_[PAINT_MAX_INPUT_SAMPLES];
+  int num_samples_ = 0;
+  int cur_sample_ = 0;
+  int tot_samples_ = 0;
+
+  float3 last_world_space_position_ = float3(0.0f, 0.0f, 0.0f);
+  float3 last_scene_spacing_delta_ = float3(0.0f, 0.0f, 0.0f);
+
+  bool stroke_over_mesh_ = false;
+  /* space distance covered so far */
+  float stroke_distance_ = 0.0f;
+
+  /* Set whether any stroke step has yet occurred
+   * e.g. in sculpt mode, stroke doesn't start until cursor
+   * passes over the mesh */
+  bool stroke_started_ = false;
+  /* Set when enough motion was found for rake rotation */
+  bool rake_started_ = false;
+  /* event that started stroke, for modal() return */
+  int event_type_ = 0;
+  /* check if stroke variables have been initialized */
+  bool stroke_init_ = false;
+  /** Check if input variables have been initialized (e.g. cursor position & pressure). */
+  bool input_init_ = false;
+  float2 initial_mouse_ = float2(0.0f, 0.0f);
+  float cached_size_pressure_ = 0.0f;
+  /* last pressure will store last pressure value for use in interpolation for space strokes */
+  float last_pressure_ = 0.0f;
+  BrushStrokeMode stroke_mode_ = BrushStrokeMode::Normal;
+  BrushSwitchMode brush_switch_mode_ = BrushSwitchMode::None;
+
+  float last_tablet_event_pressure_ = 0.0f;
+
+  float zoom_2d_ = 0.0f;
+  bool pen_flip_ = false;
+
+  /* Tilt, as read from the event. */
+  float2 tilt_ = float2(0.0f, 0.0f);
+
+  bool original_ = false; /* Ray-cast original mesh at start of stroke. */
+
+ public:
+  PaintStroke() = delete;
+
+  /**
+   * The main modal callback shared by any custom operator that implements a form of painting.
+   *
+   * At a high level, this function performs the following steps for interactive stroke types:
+   * 1. Initialization of necessary common `PaintStroke` values.
+   * 2. Custom paint initialization via `test_start`>
+   * 3. Create an `OperatorStrokeElement` for a given mouse position by calling `get_location`
+   *    to potentially turn screen space coordinates into object space coordinates.
+   * 4. Call `update_step` to perform custom paint operation on the most recent
+   *    `OperatorStrokeElement` data.
+   * 5. Tag extra redraws if necessary via `redraw`.
+   * 6. Return to step 3 while stroke is ongoing.
+   * 7. Call `done` when finished to perform any cleanup or finalization.
+   */
+  wmOperatorStatus modal(bContext *C, wmOperator *op, const wmEvent *event);
+  wmOperatorStatus exec(bContext *C, wmOperator *op);
+
+  /** Cancel a stroke and return to the initial state.
+
+aitwarcl@aitwarcl:/media/aitwarcl/b6fec136-6fdf-43ec-aa0e-0c5f6a0afa37/BlenderRepo/blender-main/blender$ grep -rn -C 5 "stroke_apply" source/blender/editors/sculpt_paint/paint_stroke.cc
+aitwarcl@aitwarcl:/media/aitwarcl/b6fec136-6fdf-43ec-aa0e-0c5f6a0afa37/BlenderRepo/blender-main/blender$ 
+
+aitwarcl@aitwarcl:/media/aitwarcl/b6fec136-6fdf-43ec-aa0e-0c5f6a0afa37/BlenderRepo/blender-main/blender$ grep -rn -C 3 "brush" source/blender/editors/sculpt_paint/paint_stroke.cc | grep -E "mtex|image|texture"
+285:    if (ELEM(brush.mtex.brush_map_mode,
+293:    if (brush.mtex.brush_map_mode == MTEX_MAP_MODE_RANDOM) {
+294:      BKE_brush_randomize_texture_coords(paint, false);
+300-    /* take care of mask texture, if any */
+301:    if (brush.mask_mtex.tex) {
+303:      if (ELEM(brush.mask_mtex.brush_map_mode,
+311:      if (brush.mask_mtex.brush_map_mode == MTEX_MAP_MODE_RANDOM) {
+312:        BKE_brush_randomize_texture_coords(paint, true);
+389:    if (brush.mtex.brush_angle_mode & MTEX_ANGLE_RANDOM) {
+390:      paint_runtime.brush_rotation += -brush.mtex.random_angle / 2.0f +
+391:                                      brush.mtex.random_angle * rng_->get_float();
+396:    if (brush.mask_mtex.brush_angle_mode & MTEX_ANGLE_RANDOM) {
+397:      paint_runtime.brush_rotation_sec += -brush.mask_mtex.random_angle / 2.0f +
+398:                                          brush.mask_mtex.random_angle * rng_->get_float();
+437:                !(invert && brush.image_brush_type == IMAGE_PAINT_BRUSH_TYPE_CLONE);
+480-/* the following code is adapted from texture paint. It may not be needed but leaving here
+890-   * to avoid locking up to get the image buffer during sampling. */
+894:  if (this->brush->mtex.tex && this->brush->mtex.tex->type == TEX_IMAGE &&
+895:      this->brush->mtex.tex->ima)
+897-    ImBuf *tex_ibuf = BKE_image_acquire_ibuf(
+898:        this->brush->mtex.tex->ima, &this->brush->mtex.tex->iuser, nullptr);
+903:    BKE_image_release_ibuf(this->brush->mtex.tex->ima, tex_ibuf, nullptr);
+949:    if (!(this->brush->mtex.brush_angle_mode & MTEX_ANGLE_RAKE)) {
+953:    if (!(this->brush->mask_mtex.brush_angle_mode & MTEX_ANGLE_RAKE)) {
+1046:      if ((br.image_brush_type == IMAGE_PAINT_BRUSH_TYPE_FILL) && (br.flag & BRUSH_USE_GRADIENT)) {
+1297:    if ((br.mtex.brush_angle_mode & MTEX_ANGLE_RAKE) ||
+1298:        (br.mask_mtex.brush_angle_mode & MTEX_ANGLE_RAKE))
+1551:      if ((br->mtex.brush_angle_mode & MTEX_ANGLE_RAKE) ||
+1552:          (br->mask_mtex.brush_angle_mode & MTEX_ANGLE_RAKE))
+
+aitwarcl@aitwarcl:/media/aitwarcl/b6fec136-6fdf-43ec-aa0e-0c5f6a0afa37/BlenderRepo/blender-main/blender$ grep -rn -A 10 "paint_stroke_start" source/blender/editors/sculpt_paint/paint_stroke.cc
+aitwarcl@aitwarcl:/media/aitwarcl/b6fec136-6fdf-43ec-aa0e-0c5f6a0afa37/BlenderRepo/blender-main/blender$ 
+
+aitwarcl@aitwarcl:/media/aitwarcl/b6fec136-6fdf-43ec-aa0e-0c5f6a0afa37/BlenderRepo/blender-main/blender$ grep -rn "class PaintModeData" source/blender/editors/sculpt_paint/
+source/blender/editors/sculpt_paint/paint_intern.hh:64:class PaintModeData;
+source/blender/editors/sculpt_paint/paint_intern.hh:324:class PaintModeData {
+source/blender/editors/sculpt_paint/mesh/mesh_paint.hh:22:class PaintModeData;
+
+aitwarcl@aitwarcl:/media/aitwarcl/b6fec136-6fdf-43ec-aa0e-0c5f6a0afa37/BlenderRepo/blender-main/blender$ grep -rn "update_step" source/blender/editors/sculpt_paint/
+source/blender/editors/sculpt_paint/grease_pencil/draw_ops.cc:91:  void update_step(wmOperator *op, PointerRNA *stroke_element) override;
+source/blender/editors/sculpt_paint/grease_pencil/draw_ops.cc:201:void GreasePencilPaintStroke::update_step(wmOperator *op, PointerRNA *stroke_element)
+source/blender/editors/sculpt_paint/paint_intern.hh:191:   * 4. Call `update_step` to perform custom paint operation on the most recent
+source/blender/editors/sculpt_paint/paint_intern.hh:250:  virtual void update_step(wmOperator *op, PointerRNA *itemptr) = 0;
+source/blender/editors/sculpt_paint/curves/sculpt_ops.cc:191:  void update_step(wmOperator *op, PointerRNA *stroke_element) override;
+source/blender/editors/sculpt_paint/curves/sculpt_ops.cc:213:void SculptCurvesBrushStroke::update_step(wmOperator *op, PointerRNA *stroke_element)
+source/blender/editors/sculpt_paint/paint_stroke.cc:564:    this->update_step(op, &itemptr);
+source/blender/editors/sculpt_paint/paint_stroke.cc:1658:        this->update_step(op, &itemptr);
+source/blender/editors/sculpt_paint/paint_stroke.cc:1662:      this->update_step(op, &itemptr);
+source/blender/editors/sculpt_paint/mesh/sculpt_expand.cc:1725:      flush_update_step(C, UpdateType::Mask);
+source/blender/editors/sculpt_paint/mesh/sculpt_expand.cc:1731:      flush_update_step(C, UpdateType::FaceSet);
+source/blender/editors/sculpt_paint/mesh/sculpt_expand.cc:1737:      flush_update_step(C, UpdateType::Color);
+source/blender/editors/sculpt_paint/mesh/sculpt_expand.cc:2151:      flush_update_step(C, UpdateType::Mask);
+source/blender/editors/sculpt_paint/mesh/sculpt_expand.cc:2156:      flush_update_step(C, UpdateType::FaceSet);
+source/blender/editors/sculpt_paint/mesh/sculpt_expand.cc:2192:      flush_update_step(C, UpdateType::Color);
+source/blender/editors/sculpt_paint/mesh/sculpt_cloth.cc:2445:  flush_update_step(C, UpdateType::Position);
+source/blender/editors/sculpt_paint/mesh/sculpt_filter_mesh.cc:2291:  flush_update_step(C, UpdateType::Position);
+source/blender/editors/sculpt_paint/mesh/sculpt_intern.hh:511:void flush_update_step(bContext *C, UpdateType update_type);
+source/blender/editors/sculpt_paint/mesh/sculpt_intern.hh:512:void flush_update_step(ViewContext &vc, Object &object, UpdateType update_type);
+source/blender/editors/sculpt_paint/mesh/paint_vertex.cc:845:  void update_step(wmOperator *op, PointerRNA *itemptr) override;
+source/blender/editors/sculpt_paint/mesh/paint_vertex.cc:1834:void VertexPaintStroke::update_step(wmOperator * /*op*/, PointerRNA *itemptr)
+source/blender/editors/sculpt_paint/mesh/sculpt_filter_mask.cc:1079:  flush_update_step(C, UpdateType::Mask);
+source/blender/editors/sculpt_paint/mesh/paint_image_ops_paint.cc:361:  void update_step(wmOperator *op, PointerRNA *itemptr) override;
+source/blender/editors/sculpt_paint/mesh/paint_image_ops_paint.cc:367:void ImagePaintStroke::update_step(wmOperator *op, PointerRNA *itemptr)
+source/blender/editors/sculpt_paint/mesh/sculpt_transform.cc:616:    flush_update_step(C, UpdateType::Position);
+source/blender/editors/sculpt_paint/mesh/sculpt_face_set.cc:1528:  flush_update_step(C, UpdateType::Position);
+source/blender/editors/sculpt_paint/mesh/sculpt_filter_color.cc:469:  flush_update_step(C, UpdateType::Color);
+source/blender/editors/sculpt_paint/mesh/sculpt_project.cc:215:  flush_update_step(&C, UpdateType::Position);
+source/blender/editors/sculpt_paint/mesh/paint_weight.cc:908:  void update_step(wmOperator *op, PointerRNA *itemptr) override;
+source/blender/editors/sculpt_paint/mesh/paint_weight.cc:1794:void WeightPaintStroke::update_step(wmOperator * /*op*/, PointerRNA *itemptr)
+source/blender/editors/sculpt_paint/mesh/sculpt.cc:5069:  void update_step(wmOperator *op, PointerRNA *itemptr) override;
+source/blender/editors/sculpt_paint/mesh/sculpt.cc:5245:void flush_update_step(bContext *C, const UpdateType update_type)
+source/blender/editors/sculpt_paint/mesh/sculpt.cc:5248:  flush_update_step(vc, *CTX_data_active_object(C), update_type);
+source/blender/editors/sculpt_paint/mesh/sculpt.cc:5251:void flush_update_step(ViewContext &vc, Object &object, const UpdateType update_type)
+source/blender/editors/sculpt_paint/mesh/sculpt.cc:5927:void SculptPaintStroke::update_step(wmOperator * /*op*/, PointerRNA *itemptr)
+source/blender/editors/sculpt_paint/mesh/sculpt.cc:5960:    flush_update_step(this->vc, *this->object, UpdateType::Mask);
+source/blender/editors/sculpt_paint/mesh/sculpt.cc:5964:      flush_update_step(this->vc, *this->object, UpdateType::Image);
+source/blender/editors/sculpt_paint/mesh/sculpt.cc:5967:      flush_update_step(this->vc, *this->object, UpdateType::Color);
+source/blender/editors/sculpt_paint/mesh/sculpt.cc:5971:    flush_update_step(this->vc, *this->object, UpdateType::Position);
+
+aitwarcl@aitwarcl:/media/aitwarcl/b6fec136-6fdf-43ec-aa0e-0c5f6a0afa37/BlenderRepo/blender-main/blender$ grep -rn "PaintStroke" source/blender/editors/sculpt_paint/paint_image*
+grep: source/blender/editors/sculpt_paint/paint_image*: Nie ma takiego pliku ani katalogu
+aitwarcl@aitwarcl:/media/aitwarcl/b6fec136-6fdf-43ec-aa0e-0c5f6a0afa37/BlenderRepo/blender-main/blender$ 
+
+aitwarcl@aitwarcl:/media/aitwarcl/b6fec136-6fdf-43ec-aa0e-0c5f6a0afa37/BlenderRepo/blender-main/blender$ sed -n '350,420p' source/blender/editors/sculpt_paint/mesh/paint_image_ops_paint.cc
+
+  return pop;
+}
+
+struct ImagePaintStroke final : public PaintStroke {
+  ImagePaintStroke(bContext *C, wmOperator *op, const wmEvent *event) : PaintStroke(C, op, event)
+  {
+  }
+
+  bool get_location(float location[3], const float mouse[2], bool force_original) override;
+  bool test_start(wmOperator *op, const float mouse[2]) override;
+  void update_step(wmOperator *op, PointerRNA *itemptr) override;
+  void redraw(bool final) override;
+  bool test_cancel() override;
+  void done(bool is_cancel, bool stroke_started) override;
+};
+
+void ImagePaintStroke::update_step(wmOperator *op, PointerRNA *itemptr)
+{
+  PaintOperation *pop = static_cast<PaintOperation *>(mode_data_.get());
+  BLI_assert(pop != nullptr);
+  if (pop == nullptr) {
+    return;
+  }
+
+  Paint *paint = BKE_paint_get_active_from_context(this->evil_C);
+  bke::PaintRuntime *paint_runtime = paint->runtime;
+  Brush *brush = BKE_paint_brush(paint);
+
+  float alphafac = (brush->flag & BRUSH_ACCUMULATE) ? paint_runtime->overlap_factor : 1.0f;
+
+  /* initial brush values. Maybe it should be considered moving these to stroke system */
+  float startalpha = BKE_brush_alpha_get(paint, brush);
+
+  float mouse[2];
+  float pressure;
+  float size;
+  float distance = this->stroke_distance();
+  int eraser;
+
+  RNA_float_get_array(itemptr, "mouse", mouse);
+  pressure = RNA_float_get(itemptr, "pressure");
+  eraser = RNA_boolean_get(op->ptr, "pen_flip");
+  size = RNA_float_get(itemptr, "size");
+
+  /* stroking with fill tool only acts on stroke end */
+  if (brush->image_brush_type == IMAGE_PAINT_BRUSH_TYPE_FILL) {
+    copy_v2_v2(pop->prevmouse, mouse);
+    return;
+  }
+
+  if (BKE_brush_use_alpha_pressure(brush)) {
+    pressure = BKE_curvemapping_evaluateF(brush->curve_strength, 0, pressure);
+    BKE_brush_alpha_set(paint, brush, max_ff(0.0f, startalpha * pressure * alphafac));
+  }
+  else {
+    BKE_brush_alpha_set(paint, brush, max_ff(0.0f, startalpha * alphafac));
+  }
+
+  if (ELEM(brush->stroke_method, BRUSH_STROKE_DRAG_DOT, BRUSH_STROKE_ANCHORED)) {
+    UndoStack *ustack = CTX_wm_manager(this->evil_C)->runtime->undo_stack;
+    ED_image_undo_restore(ustack->step_init);
+  }
+
+  //pop->mode->paint_stroke(
+  //    this->evil_C, pop->stroke_handle, pop->prevmouse, mouse, eraser, pressure, distance, size);
+
+  // INTERFEJS MCP:
+if (mcp_is_enabled(this->evil_C)) {
+    for (int i = 0; i < mcp_get_active_channels_count(); ++i) {
+        // 1. Ustawienie tekstury pędzla przypisanej do kanału (np. Roughness / Normal / Albedo)
+
+aitwarcl@aitwarcl:/media/aitwarcl/b6fec136-6fdf-43ec-aa0e-0c5f6a0afa37/BlenderRepo/blender-main/blender$ grep -rn -C 3 "brush" source/blender/editors/sculpt_paint/mesh/paint_image_ops_paint.cc | grep -E "mtex|image|slot|texture"
+337:  if ((brush->image_brush_type == IMAGE_PAINT_BRUSH_TYPE_FILL) &&
+341-        SPACE_TYPE_ANY, RGN_TYPE_ANY, ED_image_tools_paint_poll, gradient_draw_line, pop.get());
+345-  ED_image_undo_push_begin(op->type->name, PaintMode::Texture2D);
+396:  if (brush->image_brush_type == IMAGE_PAINT_BRUSH_TYPE_FILL) {
+411-    ED_image_undo_restore(ustack->step_init);
+421:        mcp_bind_channel_brush_texture(brush, i);
+423-        // 2. Podpięcie aktywnego slotu materiału / tekstury docelowej
+424-        mcp_bind_channel_target_slot(this->evil_C, i);
+468:  if (brush->image_brush_type == IMAGE_PAINT_BRUSH_TYPE_FILL) {
+
+aitwarcl@aitwarcl:/media/aitwarcl/b6fec136-6fdf-43ec-aa0e-0c5f6a0afa37/BlenderRepo/blender-main/blender$ grep -rn -C 25 "struct PaintOperation" source/blender/editors/sculpt_paint/mesh/paint_image_ops_paint.cc
+204-  }
+205-
+206- private:
+207-  void paint_fill(const bContext *C,
+208-                  const Paint *paint,
+209-                  Brush *brush,
+210-                  PaintStroke *stroke,
+211-                  void *stroke_handle,
+212-                  float mouse_start[2],
+213-                  float mouse_end[2])
+214-  {
+215-    paint_proj_stroke(C,
+216-                      stroke_handle,
+217-                      mouse_start,
+218-                      mouse_end,
+219-                      stroke->stroke_flipped(),
+220-                      1.0,
+221-                      0.0,
+222-                      BKE_brush_radius_get(paint, brush));
+223-    /* two redraws, one for GPU update, one for notification */
+224-    paint_proj_redraw(C, stroke_handle, false);
+225-    paint_proj_redraw(C, stroke_handle, true);
+226-  }
+227-};
+228-
+229:struct PaintOperation : public PaintModeData {
+230-  AbstractPaintMode *mode = nullptr;
+231-
+232-  void *stroke_handle = nullptr;
+233-
+234-  float prevmouse[2] = {0.0f, 0.0f};
+235-  float startmouse[2] = {0.0f, 0.0f};
+236-  double starttime = 0.0;
+237-
+238-  wmPaintCursor *cursor = nullptr;
+239-  ViewContext vc = {nullptr};
+240-
+241-  PaintOperation() = default;
+242-  ~PaintOperation() override
+243-  {
+244-    MEM_delete(mode);
+245-    mode = nullptr;
+246-
+247-    if (cursor) {
+248-      WM_paint_cursor_end(cursor);
+249-      cursor = nullptr;
+250-    }
+251-  }
+252-};
+253-
+254-static void gradient_draw_line(bContext * /*C*/,
+
+aitwarcl@aitwarcl:/media/aitwarcl/b6fec136-6fdf-43ec-aa0e-0c5f6a0afa37/BlenderRepo/blender-main/blender$ grep -rn "paint_proj_stroke(" source/blender/editors/sculpt_paint/
+source/blender/editors/sculpt_paint/paint_intern.hh:464:void paint_proj_stroke(const bContext *C,
+source/blender/editors/sculpt_paint/mesh/paint_image_ops_paint.cc:171:    paint_proj_stroke(C, stroke_handle, prev_mouse, mouse, eraser, pressure, distance, size);
+source/blender/editors/sculpt_paint/mesh/paint_image_ops_paint.cc:215:    paint_proj_stroke(C,
+source/blender/editors/sculpt_paint/mesh/paint_image_proj.cc:6056:void paint_proj_stroke(const bContext *C,
+
+aitwarcl@aitwarcl:/media/aitwarcl/b6fec136-6fdf-43ec-aa0e-0c5f6a0afa37/BlenderRepo/blender-main/blender$ sed -n '6056,6090p' source/blender/editors/sculpt_paint/mesh/paint_image_proj.cc
+void paint_proj_stroke(const bContext *C,
+                       void *ps_handle_p,
+                       const float prev_pos[2],
+                       const float pos[2],
+                       const bool eraser,
+                       float pressure,
+                       float distance,
+                       float size)
+{
+  int i;
+  ProjStrokeHandle *ps_handle = static_cast<ProjStrokeHandle *>(ps_handle_p);
+
+  /* clone gets special treatment here to avoid going through image initialization */
+  if (ps_handle->is_clone_cursor_pick) {
+    Scene *scene = ps_handle->scene;
+    Depsgraph *depsgraph = CTX_data_ensure_evaluated_depsgraph(C);
+    View3D *v3d = CTX_wm_view3d(C);
+    ARegion *region = CTX_wm_region(C);
+    float *cursor = scene->cursor.location;
+    const int mval_i[2] = {int(pos[0]), int(pos[1])};
+
+    view3d_operator_needs_gpu(C);
+
+    /* Ensure the depth buffer is updated for #ED_view3d_autodist. */
+    ED_view3d_depth_override(
+        depsgraph, region, v3d, nullptr, V3D_DEPTH_NO_GPENCIL, false, nullptr);
+
+    if (!ED_view3d_autodist(region, v3d, mval_i, cursor, nullptr)) {
+      return;
+    }
+
+    DEG_id_tag_update(&scene->id, ID_RECALC_SYNC_TO_EVAL);
+    ED_region_tag_redraw(region);
+
+    return;
+
+aitwarcl@aitwarcl:/media/aitwarcl/b6fec136-6fdf-43ec-aa0e-0c5f6a0afa37/BlenderRepo/blender-main/blender$ sed -n '6091,6220p' source/blender/editors/sculpt_paint/mesh/paint_image_proj.cc
+  }
+
+  for (i = 0; i < ps_handle->ps_views_tot; i++) {
+    ProjPaintState *ps = ps_handle->ps_views[i];
+    paint_proj_stroke_ps(C, ps_handle_p, prev_pos, pos, eraser, pressure, distance, size, ps);
+  }
+}
+
+/* initialize project paint settings from context */
+static void project_state_init(bContext *C,
+                               Object *ob,
+                               ProjPaintState *ps,
+                               const BrushStrokeMode mode,
+                               const BrushSwitchMode brush_switch_mode)
+{
+  Scene *scene = CTX_data_scene(C);
+  ToolSettings *settings = scene->toolsettings;
+
+  /* brush */
+  ps->mode = mode;
+  ps->brush_switch_mode = brush_switch_mode;
+  ps->paint = BKE_paint_get_active_from_context(C);
+  ps->brush = BKE_paint_brush(&settings->imapaint.paint);
+  if (ps->brush) {
+    Brush *brush = ps->brush;
+    ps->brush_type = brush->image_brush_type;
+    ps->blend = brush->blend;
+    if (brush_switch_mode == BrushSwitchMode::Smooth) {
+      ps->brush_type = IMAGE_PAINT_BRUSH_TYPE_SOFTEN;
+    }
+    /* only check for inversion for the soften brush, elsewhere,
+     * a resident brush inversion flag can cause issues */
+    if (ps->brush_type == IMAGE_PAINT_BRUSH_TYPE_SOFTEN) {
+      ps->mode = (ps->mode == BrushStrokeMode::Invert) != ((brush->flag & BRUSH_DIR_IN) != 0) ?
+                     BrushStrokeMode::Invert :
+                     BrushStrokeMode::Normal;
+
+      ps->blurkernel = paint_new_blur_kernel(brush, true);
+    }
+
+    /* disable for 3d mapping also because painting on mirrored mesh can create "stripes" */
+    ps->do_masking = paint_use_opacity_masking(ps->paint, brush);
+    ps->is_texbrush = (brush->mtex.tex && ps->brush_type == IMAGE_PAINT_BRUSH_TYPE_DRAW) ? true :
+                                                                                           false;
+    ps->is_maskbrush = (brush->mask_mtex.tex) ? true : false;
+  }
+  else {
+    /* Brush may be nullptr. */
+    ps->do_masking = false;
+    ps->is_texbrush = false;
+    ps->is_maskbrush = false;
+  }
+
+  /* sizeof(ProjPixel), since we alloc this a _lot_ */
+  ps->pixel_sizeof = project_paint_pixel_sizeof(ps->brush_type);
+  BLI_assert(ps->pixel_sizeof >= sizeof(ProjPixel));
+
+  /* these can be nullptr */
+  ps->v3d = CTX_wm_view3d(C);
+  ps->rv3d = CTX_wm_region_view3d(C);
+  ps->region = CTX_wm_region(C);
+
+  ps->depsgraph = CTX_data_ensure_evaluated_depsgraph(C);
+  ps->scene = scene;
+  /* allow override of active object */
+  ps->ob = ob;
+
+  ps->do_material_slots = (settings->imapaint.mode == IMAGEPAINT_MODE_MATERIAL);
+  ps->stencil_ima = settings->imapaint.stencil;
+  ps->canvas_ima = (!ps->do_material_slots) ? settings->imapaint.canvas : nullptr;
+  ps->clone_ima = (!ps->do_material_slots) ? settings->imapaint.clone : nullptr;
+
+  ps->do_mask_cavity = (settings->imapaint.paint.flags & PAINT_USE_CAVITY_MASK);
+  ps->cavity_curve = settings->imapaint.paint.cavity_curve;
+
+  /* setup projection painting data */
+  if (ps->brush_type != IMAGE_PAINT_BRUSH_TYPE_FILL) {
+    ps->do_backfacecull = !(settings->imapaint.flag & IMAGEPAINT_PROJECT_BACKFACE);
+    ps->do_occlude = !(settings->imapaint.flag & IMAGEPAINT_PROJECT_XRAY);
+    ps->do_mask_normal = !(settings->imapaint.flag & IMAGEPAINT_PROJECT_FLAT);
+  }
+  else {
+    ps->do_backfacecull = ps->do_occlude = ps->do_mask_normal = false;
+  }
+
+  if (ps->brush_type == IMAGE_PAINT_BRUSH_TYPE_CLONE) {
+    ps->do_layer_clone = (settings->imapaint.flag & IMAGEPAINT_PROJECT_LAYER_CLONE);
+  }
+
+  ps->do_stencil_brush = (ps->brush_type == IMAGE_PAINT_BRUSH_TYPE_MASK);
+  /* deactivate stenciling for the stencil brush :) */
+  ps->do_layer_stencil = ((settings->imapaint.flag & IMAGEPAINT_PROJECT_LAYER_STENCIL) &&
+                          !(ps->do_stencil_brush) && ps->stencil_ima);
+  ps->do_layer_stencil_inv = ((settings->imapaint.flag & IMAGEPAINT_PROJECT_LAYER_STENCIL_INV) !=
+                              0);
+
+#ifndef PROJ_DEBUG_NOSEAMBLEED
+  /* pixel num to bleed */
+  ps->seam_bleed_px = settings->imapaint.seam_bleed;
+  ps->seam_bleed_px_sq = square_s(settings->imapaint.seam_bleed);
+#endif
+
+  if (ps->do_mask_normal) {
+    ps->normal_angle_inner = settings->imapaint.normal_angle;
+    ps->normal_angle = (ps->normal_angle_inner + 90.0f) * 0.5f;
+  }
+  else {
+    ps->normal_angle_inner = ps->normal_angle = settings->imapaint.normal_angle;
+  }
+
+  ps->normal_angle_inner *= float(M_PI_2 / 90);
+  ps->normal_angle *= float(M_PI_2 / 90);
+  ps->normal_angle_range = ps->normal_angle - ps->normal_angle_inner;
+
+  if (ps->normal_angle_range <= 0.0f) {
+    /* no need to do blending */
+    ps->do_mask_normal = false;
+  }
+
+  ps->normal_angle__cos = cosf(ps->normal_angle);
+  ps->normal_angle_inner__cos = cosf(ps->normal_angle_inner);
+
+  ps->dither = settings->imapaint.dither;
+}
+
+void *paint_proj_new_stroke(bContext *C,
+                            Object *ob,
+                            const float mouse[2],
+                            const BrushStrokeMode mode,
+                            const BrushSwitchMode brush_switch_mode)
+
+aitwarcl@aitwarcl:/media/aitwarcl/b6fec136-6fdf-43ec-aa0e-0c5f6a0afa37/BlenderRepo/blender-main/blender$ grep -rn -A 25 "struct ProjStrokeHandle" source/blender/editors/sculpt_paint/mesh/paint_image_proj.cc
+246:struct ProjStrokeHandle {
+247-  /* Support for painting from multiple views at once,
+248-   * currently used to implement symmetry painting,
+249-   * we can assume at least the first is set while painting. */
+250-  ProjPaintState *ps_views[8];
+251-
+252-  /* Store initial starting points for perlin noise on the beginning of each stroke when using
+253-   * color jitter. */
+254-  std::optional<float3> initial_hsv_jitter;
+255-
+256-  int ps_views_tot;
+257-  int symmetry_flags;
+258-
+259-  int orig_brush_size;
+260-
+261-  bool need_redraw;
+262-
+263-  /* trick to bypass regular paint and allow clone picking */
+264-  bool is_clone_cursor_pick;
+265-
+266-  /* In ProjPaintState, only here for convenience */
+267-  Scene *scene;
+268-  Paint *paint;
+269-  Brush *brush;
+270-};
+271-
+
+aitwarcl@aitwarcl:/media/aitwarcl/b6fec136-6fdf-43ec-aa0e-0c5f6a0afa37/BlenderRepo/blender-main/blender$ grep -rn -A 35 "struct ProjPaintState" source/blender/editors/sculpt_paint/mesh/paint_image_proj.cc
+211:struct ProjPaintState;
+212-
+213-/**
+214- * This is mainly a convenience struct used so we can keep an array of images we use -
+215- * their #ImBuf's, etc, in 1 array, When using threads this array is copied for each thread
+216- * because 'partRedrawRect' and 'touch' values would not be thread safe.
+217- */
+218-struct ProjPaintImage {
+219-  Image *ima;
+220-  ImageUser iuser;
+221-  ImBuf *ibuf;
+222-
+223-  /* Regenerated in project_paint_op to avoid calling `_for_write()` in threaded loops. */
+224-  float *float_data_mut = nullptr;
+225-  uint8_t *byte_data_mut = nullptr;
+226-
+227-  ImagePaintPartialRedraw *partRedrawRect;
+228-  /** Only used to build undo tiles during painting. */
+229-  volatile const void **undoRect;
+230-  /** The mask accumulation must happen on canvas, not on space screen bucket.
+231-   * Here we store the mask rectangle. */
+232-  ushort **maskRect;
+233-  /** Store flag to enforce validation of undo rectangle. */
+234-  bool **valid;
+235-  bool touch;
+236-  /** Paint color in the colorspace of this image, cached for performance. */
+237-  float paint_color_byte[3];
+238-  bool is_data;
+239-  bool is_srgb;
+240-  const ColorSpace *byte_colorspace;
+241-};
+242-
+243-/**
+244- * Handle for stroke (operator customdata)
+245- */
+246-struct ProjStrokeHandle {
+--
+281:struct ProjPaintState {
+282-  View3D *v3d;
+283-  RegionView3D *rv3d;
+284-  ARegion *region;
+285-  Depsgraph *depsgraph;
+286-  Scene *scene;
+287-  /* PROJ_SRC_**** */
+288-  int source;
+289-
+290-  /* Scene linear paint color. It can change depending on inverted mode or not. */
+291-  float paint_color_linear[3];
+292-  float dither;
+293-
+294-  Paint *paint;
+295-  Brush *brush;
+296-
+297-  /**
+298-   * Based on #Brush::image_brush_type but may be overridden by mode (#BrushStrokeMode).
+299-   * So check this value instead of `brush->image_brush_type`.
+300-   */
+301-  short brush_type;
+302-  short blend;
+303-  BrushStrokeMode mode;
+304-  BrushSwitchMode brush_switch_mode;
+305-
+306-  float brush_size;
+307-  Object *ob;
+308-  /* for symmetry, we need to store modified object matrix */
+309-  float obmat[4][4];
+310-  float obmat_imat[4][4];
+311-  /* end similarities with ImagePaintState */
+312-
+313-  Image *stencil_ima;
+314-  Image *canvas_ima;
+315-  Image *clone_ima;
+316-  float stencil_value;
+
+aitwarcl@aitwarcl:/media/aitwarcl/b6fec136-6fdf-43ec-aa0e-0c5f6a0afa37/BlenderRepo/blender-main/blender$ # 1. Zobaczmy inicjalizację pociągnięcia w test_start
+sed -n '320,365p' source/blender/editors/sculpt_paint/mesh/paint_image_ops_paint.cc
+
+# 2. Sprawdźmy funkcję tworzenia uchwytu projekcji (paint_proj_new)
+grep -rn -A 25 "paint_proj_new(" source/blender/editors/sculpt_paint/
+
+# 3. Zobaczmy jak ProjPaintState przypisuje obrazy i czy inicjalizuje PBVH
+grep -rn -C 5 "canvas_ima" source/blender/editors/sculpt_paint/mesh/paint_image_proj.cc
+    bool uvs, mat, tex, stencil;
+    if (!ED_paint_proj_mesh_data_check(*scene, *ob, &uvs, &mat, &tex, &stencil)) {
+      ED_paint_data_warning(op->reports, uvs, mat, tex, stencil);
+      WM_event_add_notifier(C, NC_SCENE | ND_TOOLSETTINGS, nullptr);
+      return nullptr;
+    }
+    pop->mode = MEM_new<ProjectionPaintMode>("ProjectionPaintMode");
+  }
+  else {
+    pop->mode = MEM_new<ImagePaintMode>("ImagePaintMode");
+  }
+
+  pop->stroke_handle = pop->mode->paint_new_stroke(C, op, ob, mouse, mode, brush_switch_mode);
+  if (!pop->stroke_handle) {
+    return nullptr;
+  }
+
+  if ((brush->image_brush_type == IMAGE_PAINT_BRUSH_TYPE_FILL) &&
+      (brush->flag & BRUSH_USE_GRADIENT))
+  {
+    pop->cursor = WM_paint_cursor_activate(
+        SPACE_TYPE_ANY, RGN_TYPE_ANY, ED_image_tools_paint_poll, gradient_draw_line, pop.get());
+  }
+
+  settings->imapaint.flag |= IMAGEPAINT_DRAWING;
+  ED_image_undo_push_begin(op->type->name, PaintMode::Texture2D);
+
+  BKE_curvemapping_init(brush->curve_rand_hue);
+  BKE_curvemapping_init(brush->curve_rand_saturation);
+  BKE_curvemapping_init(brush->curve_rand_value);
+
+  return pop;
+}
+
+struct ImagePaintStroke final : public PaintStroke {
+  ImagePaintStroke(bContext *C, wmOperator *op, const wmEvent *event) : PaintStroke(C, op, event)
+  {
+  }
+
+  bool get_location(float location[3], const float mouse[2], bool force_original) override;
+  bool test_start(wmOperator *op, const float mouse[2]) override;
+  void update_step(wmOperator *op, PointerRNA *itemptr) override;
+  void redraw(bool final) override;
+  bool test_cancel() override;
+  void done(bool is_cancel, bool stroke_started) override;
+};
+309-  float obmat[4][4];
+310-  float obmat_imat[4][4];
+311-  /* end similarities with ImagePaintState */
+312-
+313-  Image *stencil_ima;
+314:  Image *canvas_ima;
+315-  Image *clone_ima;
+316-  float stencil_value;
+317-
+318-  /* projection painting only */
+319-  /** For multi-threading, the first item is sometimes used for non threaded cases too. */
+--
+622-  }
+623-
+624-  const int face_i = ps->corner_tri_faces_eval[tri_index];
+625-  Material *ma = tex_get_material(ps, face_i);
+626-  TexPaintSlot *slot = ma ? ma->texpaintslot + ma->paint_active_slot : nullptr;
+627:  return slot ? slot->ima : ps->canvas_ima;
+628-}
+629-
+630-static TexPaintSlot *project_paint_face_clone_slot(const ProjPaintState *ps, int tri_index)
+631-{
+632-  const int face_i = ps->corner_tri_faces_eval[tri_index];
+--
+4283-      /* all faces should have a valid slot, reassert here */
+4284-      if (ELEM(lc->slot_clone, nullptr, slot)) {
+4285-        return true;
+4286-      }
+4287-    }
+4288:    else if (ps->clone_ima == ps->canvas_ima) {
+4289-      return true;
+4290-    }
+4291-
+4292-    if (ps->do_material_slots) {
+4293-      if (lc->slot_clone != lc->slot_last_clone) {
+--
+4510-            else if (attr.varray.is_single()) {
+4511-              single_value = attr.varray.typed<float2>().get_internal_single();
+4512-            }
+4513-          }
+4514-        }
+4515:        tpage = ps->canvas_ima;
+4516-      }
+4517-      else {
+4518-        if (slot != slot_last) {
+4519-          if (slot->uvname) {
+4520-            if (const bke::GAttributeReader attr = attributes.lookup(slot->uvname)) {
+--
+6155-  /* allow override of active object */
+6156-  ps->ob = ob;
+6157-
+6158-  ps->do_material_slots = (settings->imapaint.mode == IMAGEPAINT_MODE_MATERIAL);
+6159-  ps->stencil_ima = settings->imapaint.stencil;
+6160:  ps->canvas_ima = (!ps->do_material_slots) ? settings->imapaint.canvas : nullptr;
+6161-  ps->clone_ima = (!ps->do_material_slots) ? settings->imapaint.clone : nullptr;
+6162-
+6163-  ps->do_mask_cavity = (settings->imapaint.paint.flags & PAINT_USE_CAVITY_MASK);
+6164-  ps->cavity_curve = settings->imapaint.paint.cavity_curve;
+6165-
+
+aitwarcl@aitwarcl:/media/aitwarcl/b6fec136-6fdf-43ec-aa0e-0c5f6a0afa37/BlenderRepo/blender-main/blender$ # 1. Zobaczmy wszystkie wywołania BKE_image w tym pliku
+grep -rn "BKE_image_" source/blender/editors/sculpt_paint/mesh/paint_image_proj.cc
+
+# 2. Zobaczmy bezpośrednie odwołania do canvas_ima
+grep -rn -n -C 2 "canvas_ima" source/blender/editors/sculpt_paint/mesh/paint_image_proj.cc | head -n 40
+71:#include "BKE_image_gpu.hh"
+803:  ibuf = BKE_image_acquire_ibuf(ima, &iuser, nullptr);
+836:  BKE_image_release_ibuf(ima, ibuf, nullptr);
+1753:    if (other_tpage && (ibuf_other = BKE_image_acquire_ibuf(other_tpage, nullptr, nullptr))) {
+1759:      /* #BKE_image_acquire_ibuf - TODO: this may be slow. */
+1773:      BKE_image_release_ibuf(other_tpage, ibuf_other, nullptr);
+2051:      if (other_tpage && (ibuf_other = BKE_image_acquire_ibuf(other_tpage, nullptr, nullptr))) {
+2057:        /* #BKE_image_acquire_ibuf - TODO: this may be slow. */
+2095:        BKE_image_release_ibuf(other_tpage, ibuf_other, nullptr);
+4451:    projIma->ibuf = BKE_image_acquire_ibuf(projIma->ima, &projIma->iuser, nullptr);
+4454:      projIma->ibuf = BKE_image_acquire_ibuf(projIma->ima, &projIma->iuser, nullptr);
+4651:          if (BKE_image_has_ibuf(tpage, &iuser)) {
+4823:      BKE_image_release_ibuf(projIma->ima, projIma->ibuf, nullptr);
+4834:  BKE_image_release_ibuf(ps->reproject_image, ps->reproject_ibuf, nullptr);
+5858:  image_pool = BKE_image_pool_new();
+5935:  BKE_image_pool_free(image_pool);
+6407:  ps.reproject_ibuf = BKE_image_acquire_ibuf(image, nullptr, nullptr);
+6600:  image = BKE_image_add_from_imbuf(bmain, ibuf, "image_view");
+6824:  ima = BKE_image_add_generated(bmain,
+7066:      BKE_image_signal(bmain, ima, nullptr, IMA_SIGNAL_USER_NEW_IMAGE);
+312-
+313-  Image *stencil_ima;
+314:  Image *canvas_ima;
+315-  Image *clone_ima;
+316-  float stencil_value;
+--
+625-  Material *ma = tex_get_material(ps, face_i);
+626-  TexPaintSlot *slot = ma ? ma->texpaintslot + ma->paint_active_slot : nullptr;
+627:  return slot ? slot->ima : ps->canvas_ima;
+628-}
+629-
+--
+4286-      }
+4287-    }
+4288:    else if (ps->clone_ima == ps->canvas_ima) {
+4289-      return true;
+4290-    }
+--
+4513-          }
+4514-        }
+4515:        tpage = ps->canvas_ima;
+4516-      }
+4517-      else {
+--
+6158-  ps->do_material_slots = (settings->imapaint.mode == IMAGEPAINT_MODE_MATERIAL);
+6159-  ps->stencil_ima = settings->imapaint.stencil;
+6160:  ps->canvas_ima = (!ps->do_material_slots) ? settings->imapaint.canvas : nullptr;
+6161-  ps->clone_ima = (!ps->do_material_slots) ? settings->imapaint.clone : nullptr;
+6162-
+
+aitwarcl@aitwarcl:/media/aitwarcl/b6fec136-6fdf-43ec-aa0e-0c5f6a0afa37/BlenderRepo/blender-main/blender$ sed -n '4440,4465p' source/blender/editors/sculpt_paint/mesh/paint_image_proj.cc
+  /* build an array of images we use */
+  projIma = ps->projImages = static_cast<ProjPaintImage *>(
+      BLI_memarena_alloc(arena, sizeof(ProjPaintImage) * ps->image_tot));
+
+  for (entry = static_cast<PrepareImageEntry *>(used_images->first); entry;
+       entry = entry->next, projIma++)
+  {
+    projIma->iuser = entry->iuser;
+    int size;
+    projIma->ima = entry->ima;
+    projIma->touch = false;
+    projIma->ibuf = BKE_image_acquire_ibuf(projIma->ima, &projIma->iuser, nullptr);
+    if (projIma->ibuf == nullptr) {
+      projIma->iuser.tile = 0;
+      projIma->ibuf = BKE_image_acquire_ibuf(projIma->ima, &projIma->iuser, nullptr);
+      BLI_assert(projIma->ibuf != nullptr);
+    }
+    size = sizeof(void **) * ED_IMAGE_UNDO_TILE_NUMBER(projIma->ibuf->x) *
+           ED_IMAGE_UNDO_TILE_NUMBER(projIma->ibuf->y);
+    projIma->partRedrawRect = static_cast<ImagePaintPartialRedraw *>(
+        BLI_memarena_alloc(arena, sizeof(ImagePaintPartialRedraw) * PROJ_BOUNDBOX_SQUARED));
+    partial_redraw_array_init(projIma->partRedrawRect);
+    projIma->undoRect = static_cast<volatile const void **>(BLI_memarena_alloc(arena, size));
+    memset(static_cast<void *>(projIma->undoRect), 0, size);
+    projIma->maskRect = static_cast<ushort **>(BLI_memarena_alloc(arena, size));
+    memset(projIma->maskRect, 0, size);
+
+aitwarcl@aitwarcl:/media/aitwarcl/b6fec136-6fdf-43ec-aa0e-0c5f6a0afa37/BlenderRepo/blender-main/blender$ grep -rn -C 5 "used_images" source/blender/editors/sculpt_paint/mesh/paint_image_proj.cc | head -n 30
+4430-  ImageUser iuser;
+4431-};
+4432-
+4433-static void project_paint_build_proj_ima(ProjPaintState *ps,
+4434-                                         MemArena *arena,
+4435:                                         ListBaseT<PrepareImageEntry> *used_images)
+4436-{
+4437-  ProjPaintImage *projIma;
+4438-  PrepareImageEntry *entry;
+4439-
+4440-  /* build an array of images we use */
+4441-  projIma = ps->projImages = static_cast<ProjPaintImage *>(
+4442-      BLI_memarena_alloc(arena, sizeof(ProjPaintImage) * ps->image_tot));
+4443-
+4444:  for (entry = static_cast<PrepareImageEntry *>(used_images->first); entry;
+4445-       entry = entry->next, projIma++)
+4446-  {
+4447-    projIma->iuser = entry->iuser;
+4448-    int size;
+4449-    projIma->ima = entry->ima;
+--
+4475-                                            const float2 *uv_map_base)
+4476-{
+4477-  const bke::AttributeAccessor attributes = ps->mesh_eval->attributes();
+4478-  const StringRef active_uv_name = ps->mesh_eval->active_uv_map_name();
+4479-  /* Image Vars - keep track of images we have used */
+4480:  ListBaseT<PrepareImageEntry> used_images = {nullptr};
+4481-
+4482-  Image *tpage_last = nullptr, *tpage;
+4483-  TexPaintSlot *slot_last = nullptr;
+
+aitwarcl@aitwarcl:/media/aitwarcl/b6fec136-6fdf-43ec-aa0e-0c5f6a0afa37/BlenderRepo/blender-main/blender$ sed -n '4480,4620p' source/blender/editors/sculpt_paint/mesh/paint_image_proj.cc
+  ListBaseT<PrepareImageEntry> used_images = {nullptr};
+
+  Image *tpage_last = nullptr, *tpage;
+  TexPaintSlot *slot_last = nullptr;
+  TexPaintSlot *slot = nullptr;
+  int tile_last = -1, tile;
+  int image_index = -1, tri_index;
+  int prev_poly = -1;
+  const Span<int3> corner_tris = ps->corner_tris_eval;
+  const Span<int> tri_faces = ps->corner_tri_faces_eval;
+
+  std::optional<float2> single_value;
+
+  BLI_assert(ps->image_tot == 0);
+
+  for (tri_index = 0; tri_index < ps->corner_tris_eval.size(); tri_index++) {
+    bool is_face_paintable;
+    bool skip_tri = false;
+
+    is_face_paintable = project_paint_check_face_paintable(ps, face_lookup, tri_index);
+
+    if (!ps->do_stencil_brush) {
+      slot = project_paint_face_paint_slot(ps, tri_index);
+      /* all faces should have a valid slot, reassert here */
+      if (slot == nullptr) {
+        if (const bke::GAttributeReader attr = attributes.lookup(active_uv_name)) {
+          if (attr.domain == bke::AttrDomain::Corner && attr.varray.type().is<float2>()) {
+            if (attr.varray.is_span()) {
+              uv_map_base = attr.varray.get_internal_span().typed<float2>().data();
+            }
+            else if (attr.varray.is_single()) {
+              single_value = attr.varray.typed<float2>().get_internal_single();
+            }
+          }
+        }
+        tpage = ps->canvas_ima;
+      }
+      else {
+        if (slot != slot_last) {
+          if (slot->uvname) {
+            if (const bke::GAttributeReader attr = attributes.lookup(slot->uvname)) {
+              if (attr.domain == bke::AttrDomain::Corner && attr.varray.type().is<float2>()) {
+                if (attr.varray.is_span()) {
+                  uv_map_base = attr.varray.get_internal_span().typed<float2>().data();
+                }
+                else if (attr.varray.is_single()) {
+                  single_value = attr.varray.typed<float2>().get_internal_single();
+                }
+              }
+            }
+          }
+
+          if (!uv_map_base) {
+            if (const bke::GAttributeReader attr = attributes.lookup(active_uv_name)) {
+              if (attr.domain == bke::AttrDomain::Corner && attr.varray.type().is<float2>()) {
+                if (attr.varray.is_span()) {
+                  uv_map_base = attr.varray.get_internal_span().typed<float2>().data();
+                }
+                else if (attr.varray.is_single()) {
+                  single_value = attr.varray.typed<float2>().get_internal_single();
+                }
+              }
+            }
+          }
+          slot_last = slot;
+        }
+
+        /* Don't allow painting on linked images. */
+        if (slot->ima != nullptr &&
+            (!ID_IS_EDITABLE(slot->ima) || ID_IS_OVERRIDE_LIBRARY(slot->ima)))
+        {
+          skip_tri = true;
+          tpage = nullptr;
+        }
+
+        /* Don't allow using the same image for painting and stenciling. */
+        if (slot->ima == ps->stencil_ima) {
+          /* Delay continuing the loop until after loop_uvs and bleed faces are initialized.
+           * While this shouldn't be used, face-winding reads all faces.
+           * It's less trouble to set all faces to valid UVs,
+           * avoiding nullptr checks all over. */
+          skip_tri = true;
+          tpage = nullptr;
+        }
+        else {
+          tpage = slot->ima;
+        }
+      }
+    }
+    else {
+      tpage = ps->stencil_ima;
+    }
+    BLI_assert(uv_map_base != nullptr || single_value.has_value());
+
+    if (single_value.has_value()) {
+      ps->poly_to_loop_uv_single = single_value;
+      tile = project_paint_face_paint_tile(tpage, single_value.value());
+    }
+    else {
+      ps->poly_to_loop_uv[tri_faces[tri_index]] = uv_map_base;
+      tile = project_paint_face_paint_tile(tpage, uv_map_base[corner_tris[tri_index][0]]);
+    }
+
+#ifndef PROJ_DEBUG_NOSEAMBLEED
+    project_paint_bleed_add_face_user(ps, arena, corner_tris[tri_index], tri_index);
+#endif
+
+    if (skip_tri || project_paint_clone_face_skip(ps, layer_clone, slot, tri_index)) {
+      continue;
+    }
+    if (is_face_paintable && tpage) {
+      ProjPaintFaceCoSS coSS;
+      proj_paint_face_coSS_init(ps, corner_tris[tri_index], &coSS);
+
+      if (project_paint_flt_max_cull(ps, &coSS)) {
+        continue;
+      }
+
+#ifdef PROJ_DEBUG_WINCLIP
+      if (project_paint_winclip(ps, &coSS)) {
+        continue;
+      }
+
+#endif  // PROJ_DEBUG_WINCLIP
+
+      /* Back-face culls individual triangles but mask normal will use face. */
+      if (ps->do_backfacecull) {
+        if (ps->do_mask_normal) {
+          if (prev_poly != tri_faces[tri_index]) {
+            bool culled = true;
+            const IndexRange poly = ps->faces_eval[tri_faces[tri_index]];
+            prev_poly = tri_faces[tri_index];
+            for (const int corner : poly) {
+              if (!(ps->vertFlags[ps->corner_verts_eval[corner]] & PROJ_VERT_CULL)) {
+                culled = false;
+                break;
+              }
+            }
+
+            if (culled) {
+              /* poly loops - 2 is number of triangles for poly,
+aitwarcl@aitwarcl:/media/aitwarcl/b6fec136-6fdf-43ec-aa0e-0c5f6a0afa37/BlenderRepo/blender-main/blender$ sed -n '4621,4760p' source/blender/editors/sculpt_paint/mesh/paint_image_proj.cc
+               * but counter gets incremented when continuing, so decrease by 3 */
+              int poly_tri = poly.size() - 3;
+              tri_index += poly_tri;
+              continue;
+            }
+          }
+        }
+        else {
+          if ((line_point_side_v2(coSS.v1, coSS.v2, coSS.v3) < 0.0f) != ps->is_flip_object) {
+            continue;
+          }
+        }
+      }
+
+      if (tpage_last != tpage || tile_last != tile) {
+        image_index = 0;
+        for (PrepareImageEntry *e = static_cast<PrepareImageEntry *>(used_images.first); e;
+             e = e->next, image_index++)
+        {
+          if (e->ima == tpage && e->iuser.tile == tile) {
+            break;
+          }
+        }
+
+        if (image_index == ps->image_tot) {
+          /* XXX get appropriate ImageUser instead */
+          ImageUser iuser;
+          BKE_imageuser_default(&iuser);
+          iuser.tile = tile;
+          iuser.framenr = tpage->lastframe;
+          if (BKE_image_has_ibuf(tpage, &iuser)) {
+            PrepareImageEntry *e = MEM_new<PrepareImageEntry>("PrepareImageEntry");
+            e->ima = tpage;
+            e->iuser = iuser;
+            BLI_addtail(&used_images, e);
+            ps->image_tot++;
+          }
+          else {
+            image_index = -1;
+          }
+        }
+
+        tpage_last = tpage;
+        tile_last = tile;
+      }
+
+      if (image_index != -1) {
+        /* Initialize the faces screen pixels */
+        /* Add this to a list to initialize later */
+        project_paint_delayed_face_init(ps, corner_tris[tri_index], tri_index);
+      }
+    }
+  }
+
+  /* Build an array of images we use. */
+  if (ps->is_shared_user == false) {
+    project_paint_build_proj_ima(ps, arena, &used_images);
+  }
+
+  /* we have built the array, discard the linked list */
+  used_images.free_no_destruct();
+}
+
+/* run once per stroke before projection painting */
+static void project_paint_begin(const bContext *C, ProjPaintState *ps, const char symmetry_flag)
+{
+  ProjPaintLayerClone layer_clone;
+  ProjPaintFaceLookup face_lookup;
+  const float2 *uv_map_base = nullptr;
+
+  /* At the moment this is just ps->arena_mt[0], but use this to show were not multi-threading. */
+  MemArena *arena;
+
+  const int diameter = BKE_brush_size_get(ps->paint, ps->brush);
+
+  bool reset_threads = false;
+
+  /* ---- end defines ---- */
+
+  if (ps->source == PROJ_SRC_VIEW) {
+    /* faster clipping lookups */
+    ED_view3d_clipping_local(ps->rv3d, ps->ob->object_to_world().ptr());
+  }
+
+  const Mesh &mesh_orig = *id_cast<const Mesh *>(ps->ob->data);
+
+  ps->do_face_sel = ((mesh_orig.editflag & ME_EDIT_PAINT_FACE_SEL) != 0);
+  ps->is_flip_object = (ps->ob->transflag & OB_NEG_SCALE) != 0;
+
+  /* paint onto the derived mesh */
+  if (ps->is_shared_user == false) {
+    if (!proj_paint_state_mesh_eval_init(C, ps)) {
+      return;
+    }
+  }
+
+  const bke::AttributeAccessor attributes = ps->mesh_eval->attributes();
+
+  proj_paint_face_lookup_init(ps, &face_lookup);
+  proj_paint_layer_clone_init(ps, &layer_clone);
+
+  if (ps->do_layer_stencil || ps->do_stencil_brush) {
+    if (const bke::GAttributeReader attr = attributes.lookup(mesh_orig.stencil_uv_map_attribute)) {
+      if (attr.domain == bke::AttrDomain::Corner && attr.varray.type().is<float2>()) {
+        if (attr.varray.is_span()) {
+          ps->uv_map_stencil_eval = attr.varray.get_internal_span().typed<float2>().data();
+        }
+      }
+    }
+
+    if (ps->uv_map_stencil_eval == nullptr) {
+      /* get active instead */
+      if (const bke::GAttributeReader attr = attributes.lookup(mesh_orig.active_uv_map_name())) {
+        if (attr.domain == bke::AttrDomain::Corner && attr.varray.type().is<float2>()) {
+          if (attr.varray.is_span()) {
+            ps->uv_map_stencil_eval = attr.varray.get_internal_span().typed<float2>().data();
+          }
+        }
+      }
+    }
+
+    if (ps->do_stencil_brush) {
+      uv_map_base = ps->uv_map_stencil_eval;
+    }
+  }
+
+  /* when using sub-surface or multi-resolution,
+   * mesh-data arrays are thrown away, we need to keep a copy. */
+  if (ps->is_shared_user == false) {
+    proj_paint_state_cavity_init(ps);
+  }
+
+  proj_paint_state_viewport_init(ps, symmetry_flag);
+
+  /* calculate vert screen coords
+   * run this early so we can calculate the x/y resolution of our bucket rect */
+  proj_paint_state_screen_coords_init(ps, diameter);
+
+  /* only for convenience */
+  ps->screen_width = ps->screenMax[0] - ps->screenMin[0];
+
+
+
+

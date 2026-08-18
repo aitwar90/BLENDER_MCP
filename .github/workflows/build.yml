@@ -1,0 +1,33 @@
+name: Build Windows EXE
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    # 1. Pobranie kodu źródłowego z Twojego repozytorium
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive # Jeśli używasz podmodułów
+
+    # 2. Konfiguracja CMake
+    - name: Configure CMake
+      run: cmake -B build -DCMAKE_BUILD_TYPE=Release
+
+    # 3. Kompilacja projektu
+    - name: Build Project
+      run: cmake --build build --config Release
+
+    # 4. Zapisanie wygenerowanego pliku .exe jako artefakt do pobrania
+    - name: Upload EXE Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: MyCompiledApp-Windows
+        path: build/Release/*.exe
