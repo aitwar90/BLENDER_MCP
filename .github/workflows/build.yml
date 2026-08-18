@@ -27,12 +27,12 @@ jobs:
         cd PrepareFiles
         python patch_and_compile.py
 
-    # 2. Pobranie zależy i kompilacja przez make.bat
+    # 2. Pobranie zależności i kompilacja przez make.bat
     - name: Download Blender Dependencies & Build
       working-directory: blender-main/blender
       run: |
-        cmd.exe /c "make.bat update"
-        cmd.exe /c "make.bat release"
+        echo y | cmd.exe /c "make.bat update"
+        cmd.exe /c "make.bat release --autodownload"
 
     # 3. Spakowanie i udostępnienie artefaktu (sprawdzona ścieżka wyjściowa Blendera)
     - name: Upload Blender Artifact
