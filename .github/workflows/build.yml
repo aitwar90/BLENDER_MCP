@@ -57,7 +57,7 @@ jobs:
             with open(cmake_path, "w", encoding="utf-8", newline="\n") as f:
                 f.write(new_content)
 
-    - name: Clean Build Directory
+    - name: Clean Old Build Directory
       shell: cmd
       run: |
         if exist blender-main\build_windows_Release_x64_vc17_Release rmdir /s /q blender-main\build_windows_Release_x64_vc17_Release
@@ -67,11 +67,12 @@ jobs:
       run: |
         python PrepareFiles\patch_and_compile.py
 
-    - name: Build Blender
+    - name: Map Drive and Build Blender
       shell: cmd
-      working-directory: blender-main/blender
       run: |
-        make.bat ninja release -- /p:CL_MPCount=8
+        subst B: "%CD%\blender-main\blender"
+        cd /d B:\
+        make.bat release
 
     - name: Upload Blender Artifact
       uses: actions/upload-artifact@v4
