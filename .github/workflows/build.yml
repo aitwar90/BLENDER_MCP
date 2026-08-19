@@ -14,6 +14,7 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
+        lfs: true
         submodules: recursive
 
     - name: Set up Python
@@ -21,29 +22,33 @@ jobs:
       with:
         python-version: '3.11'
 
-    # 1. Oficjalny skrypt Blendera dociągający biblioteki (bez błędnej flagi)
-    - name: Download Blender Dependencies
-      shell: cmd
-      working-directory: blender-main/blender
-      run: |
-        python build_files/utils/make_update.py
+    - name: Install Ninja Build Tool
+      uses: llvm/actions/install-ninja@main
 
-    # 2. Uruchomienie Twojego patchera przed kompilacją
+    # 1. Pobranie/zaktualizowanie bibliotek binarnych LFS przed odpaleniem make.bat
+    - name: Checkout & Pull External Libraries
+      shell: cmd
+      run: |
+        git submodule update --init --recursive lib/windows_x64
+        cd lib\windows_x64
+        git lfs pull
+
+    # 2. Uruchomienie patchera
     - name: Run Patch and Prepare Files
+      shell: cmd
       run: |
         cd PrepareFiles
         python patch_and_compile.py
 
-    # 3. Właściwa kompilacja w cmd
+    # 3. Właściwa kompilacja (używamy ninja dla wydajności i pomijamy wadliwe pobieranie SVN)
     - name: Build Blender
       shell: cmd
-      working-directory: blender-main/blender
       run: |
-        make.bat release
+        make.bat ninja release
 
-    # 4. Spakowanie i udostępnienie artefaktu
+    # 4. Pakowanie artefaktu
     - name: Upload Blender Artifact
       uses: actions/upload-artifact@v4
       with:
         name: Blender-MCP-Windows
-        path: blender-main/build_windows_Release_x64_vc*_Release/bin/Release/**
+        path: ..\build_windows_Release_x64_vc17_Release\bin\Release\**
