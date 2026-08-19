@@ -15,6 +15,7 @@ jobs:
       uses: actions/checkout@v4
       with:
         submodules: false
+        lfs: true # TO ROZWIĄZUJE BŁĄD CMAKE
 
     - name: Set up Python
       uses: actions/setup-python@v5
@@ -24,7 +25,6 @@ jobs:
     - name: Install Ninja Build Tool
       uses: llvm/actions/install-ninja@main
 
-    # 1. Tworzenie brakującego folderu i dociągnięcie bibliotek binarnych z repozytorium Blendera
     - name: Fetch External Windows Libraries
       shell: cmd
       run: |
@@ -37,20 +37,17 @@ jobs:
         git checkout main
         git lfs pull
 
-    # 2. Modyfikacja kodów źródłowych Twoim patcherem
     - name: Run Patch and Prepare Files
       shell: cmd
       run: |
         python PrepareFiles\patch_and_compile.py
 
-    # 3. Właściwa kompilacja
     - name: Build Blender
       shell: cmd
       working-directory: blender-main/blender
       run: |
         make.bat ninja release
 
-    # 4. Eksport artefaktu
     - name: Upload Blender Artifact
       uses: actions/upload-artifact@v4
       with:
