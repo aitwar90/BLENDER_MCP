@@ -21,12 +21,12 @@ jobs:
       with:
         python-version: '3.11'
 
-    # 1. Pociągnięcie bibliotek bezpośrednio skryptem Blendera z wymuszonym cmd
+    # 1. Oficjalny skrypt Blendera dociągający biblioteki (bez błędnej flagi)
     - name: Download Blender Dependencies
       shell: cmd
       working-directory: blender-main/blender
       run: |
-        python build_files/utils/make_update.py --use-git-submodules
+        python build_files/utils/make_update.py
 
     # 2. Uruchomienie Twojego patchera przed kompilacją
     - name: Run Patch and Prepare Files
@@ -34,14 +34,14 @@ jobs:
         cd PrepareFiles
         python patch_and_compile.py
 
-    # 3. Właściwa kompilacja (wymuszona w cmd)
+    # 3. Właściwa kompilacja w cmd
     - name: Build Blender
       shell: cmd
       working-directory: blender-main/blender
       run: |
         make.bat release
 
-    # 4. Udostępnienie artefaktu
+    # 4. Spakowanie i udostępnienie artefaktu
     - name: Upload Blender Artifact
       uses: actions/upload-artifact@v4
       with:
