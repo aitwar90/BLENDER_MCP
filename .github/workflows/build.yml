@@ -11,11 +11,11 @@ jobs:
     runs-on: windows-2022
 
     steps:
-    # 1. Pobranie źródeł kodu z automatycznym dociągnięciem submodułów
+    # 1. Pobranie źródeł kodu bez rekursywnych submodułów
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
-        submodules: recursive
+        submodules: false
 
     - name: Set up Python
       uses: actions/setup-python@v5
@@ -25,28 +25,29 @@ jobs:
     - name: Install Ninja Build Tool
       uses: llvm/actions/install-ninja@main
 
-    # 2. Dociągnięcie plików LFS w bibliotekach Windows (uruchamiane z korzenia)
-    - name: Pull LFS Libraries
+    # 2. Dociągnięcie bibliotek LFS w podkatalogu Blendera
+    - name: Pull External LFS Libraries
       shell: cmd
       run: |
-        cd blender-main\blender\lib\windows_x64
+        cd blender-main\blender
+        git submodule update --init --recursive lib/windows_x64
+        cd lib\windows_x64
         git lfs pull
 
-    # 3. Wykonanie Twojego patchera przed kompilacją
+    # 3. Modyfikacja kodów źródłowych Twoim skryptem (odpalany z root workspace'a)
     - name: Run Patch and Prepare Files
       shell: cmd
-      working-directory: PrepareFiles
       run: |
-        python patch_and_compile.py
+        python PrepareFiles\patch_and_compile.py
 
-    # 4. Kompilacja z flagą braku pytań o biblioteki
+    # 4. Właściwa kompilacja z wymuszeniem 'y' na zapytania batcha
     - name: Build Blender
       shell: cmd
       working-directory: blender-main/blender
       run: |
-        make.bat ninja release no_build_update
+        echo y | make.bat ninja release
 
-    # 5. Spakowanie i wysłanie gotowego artefaktu
+    # 5. Eksport gotowego bina
     - name: Upload Blender Artifact
       uses: actions/upload-artifact@v4
       with:
