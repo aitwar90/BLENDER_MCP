@@ -24,38 +24,35 @@ jobs:
     - name: Install Ninja Build Tool
       uses: llvm/actions/install-ninja@main
 
-    # 1. Pobranie submodułu LFS
-    - name: Pull External LFS Libraries
+    # 1. Tworzenie brakującego folderu i dociągnięcie bibliotek binarnych z repozytorium Blendera
+    - name: Fetch External Windows Libraries
       shell: cmd
       run: |
         cd blender-main\blender
-        git submodule update --init --recursive lib/windows_x64
+        mkdir lib\windows_x64
         cd lib\windows_x64
+        git init
+        git remote add origin https://projects.blender.org/blender/lib-windows_x64.git
+        git fetch --depth 1 origin main
+        git checkout main
         git lfs pull
 
-    # 2. DIAGNOSTYKA: Wypisanie zawartości katalogu bibliotek do logów GH Actions
-    - name: Debug - Inspect Directory Structure
-      shell: cmd
-      run: |
-        echo === SPRAWDZANIE KATALOGU BASE ===
-        cd blender-main\blender
-        cd
-        echo === SPRAWDZANIE KATALOGU LIB ===
-        if exist lib\windows_x64 (
-          dir lib\windows_x64
-        ) else (
-          echo FOLDER lib\windows_x64 NIE ISTNIEJE!
-        )
-
-    # 3. Modyfikacja kodów źródłowych
+    # 2. Modyfikacja kodów źródłowych Twoim patcherem
     - name: Run Patch and Prepare Files
       shell: cmd
       run: |
         python PrepareFiles\patch_and_compile.py
 
-    # 4. Kompilacja
+    # 3. Właściwa kompilacja
     - name: Build Blender
       shell: cmd
       working-directory: blender-main/blender
       run: |
         make.bat ninja release
+
+    # 4. Eksport artefaktu
+    - name: Upload Blender Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: Blender-MCP-Windows
+        path: blender-main/build_windows_Release_x64_vc17_Release/bin/Release/**
