@@ -11,11 +11,11 @@ jobs:
     runs-on: windows-2022
 
     steps:
+    # 1. Pobranie źródeł kodu
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
         submodules: false
-        lfs: true # TO ROZWIĄZUJE BŁĄD CMAKE
 
     - name: Set up Python
       uses: actions/setup-python@v5
@@ -25,11 +25,19 @@ jobs:
     - name: Install Ninja Build Tool
       uses: llvm/actions/install-ninja@main
 
+    # 2. Dociągnięcie LFS dla podkatalogu Blendera (naprawia startup.blend)
+    - name: Pull Main Blender LFS Assets
+      shell: cmd
+      run: |
+        cd blender-main\blender
+        git lfs pull
+
+    # 3. Tworzenie folderu i dociągnięcie zewnętrznych bibliotek
     - name: Fetch External Windows Libraries
       shell: cmd
       run: |
         cd blender-main\blender
-        mkdir lib\windows_x64
+        if not exist lib\windows_x64 mkdir lib\windows_x64
         cd lib\windows_x64
         git init
         git remote add origin https://projects.blender.org/blender/lib-windows_x64.git
@@ -37,17 +45,20 @@ jobs:
         git checkout main
         git lfs pull
 
+    # 4. Modyfikacja źródeł patcherem
     - name: Run Patch and Prepare Files
       shell: cmd
       run: |
         python PrepareFiles\patch_and_compile.py
 
+    # 5. Właściwa kompilacja
     - name: Build Blender
       shell: cmd
       working-directory: blender-main/blender
       run: |
         make.bat ninja release
 
+    # 6. Spakowanie artefaktu
     - name: Upload Blender Artifact
       uses: actions/upload-artifact@v4
       with:
