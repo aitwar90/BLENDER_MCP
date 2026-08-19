@@ -45,7 +45,7 @@ jobs:
       shell: powershell
       run: |
         Write-Host "==================================================" -ForegroundColor Cyan
-        Write-Host "          PEŁNA DIAGNOSTYKA PLIKÓW I CMAKE        " -ForegroundColor Cyan
+        Write-Host "          PELNA DIAGNOSTYKA PLIKOW I CMAKE        " -ForegroundColor Cyan
         Write-Host "==================================================" -ForegroundColor Cyan
 
         # A. SPRAWDZENIE FIZYCZNEGO PLIKU STARTUP.BLEND
@@ -73,7 +73,7 @@ jobs:
                 Get-Content $blendPath -Head 5 | ForEach-Object { Write-Host "     Tresc: $_" -ForegroundColor DarkGray }
             }
         } else {
-            Write-Host "  -> [CRITICAL] Plik w ogole NIE EXISTUJE pod ta sciezka!" -ForegroundColor Red
+            Write-Host "  -> [CRITICAL] Plik w ogole NIE ISTNIEJE pod ta sciezka!" -ForegroundColor Red
         }
 
         # B. ANALIZA CMAKELISTS.TXT
@@ -97,7 +97,7 @@ jobs:
         # D. ZAMIANA FATAL_ERROR NA STATUS W CMAKE
         Write-Host "`n[4/4] Aplikowanie bypassed status w CMake..." -ForegroundColor Yellow
         (Get-Content $cmakePath) -replace 'FATAL_ERROR "Detected incomplete startup blend', 'STATUS "Bypassed startup blend' | Set-Content $cmakePath
-        Write-Host "  -> Patch na CMakeLists.txt zostal nałożony." -ForegroundColor Green
+        Write-Host "  -> Patch na CMakeLists.txt zostal nalozony." -ForegroundColor Green
         Write-Host "==================================================" -ForegroundColor Cyan
 
     - name: Build Blender
