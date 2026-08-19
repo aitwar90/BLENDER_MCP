@@ -25,20 +25,19 @@ jobs:
     - name: Install Ninja Build Tool
       uses: llvm/actions/install-ninja@main
 
-    # 2. Dociągnięcie LFS dla podkatalogu Blendera (naprawia startup.blend)
-    - name: Pull Main Blender LFS Assets
+    # 2. Prawidłowe pociągnięcie wszystkich plików LFS w CAŁYM repozytorium
+    - name: Pull All Repository LFS Files
       shell: cmd
       run: |
-        cd blender-main\blender
-        git lfs pull
+        git lfs install
+        git lfs pull --include="*"
 
-    # 3. Tworzenie folderu i dociągnięcie zewnętrznych bibliotek
+    # 3. Tworzenie folderu i dociągnięcie zewnętrznych bibliotek dla Windowsa
     - name: Fetch External Windows Libraries
       shell: cmd
       run: |
-        cd blender-main\blender
-        if not exist lib\windows_x64 mkdir lib\windows_x64
-        cd lib\windows_x64
+        if not exist blender-main\blender\lib\windows_x64 mkdir blender-main\blender\lib\windows_x64
+        cd blender-main\blender\lib\windows_x64
         git init
         git remote add origin https://projects.blender.org/blender/lib-windows_x64.git
         git fetch --depth 1 origin main
