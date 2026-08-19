@@ -11,7 +11,6 @@ jobs:
     runs-on: windows-2022
 
     steps:
-    # 1. Pobranie źródeł kodu bez rekursywnych submodułów
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
@@ -25,29 +24,26 @@ jobs:
     - name: Install Ninja Build Tool
       uses: llvm/actions/install-ninja@main
 
-    # 2. Dociągnięcie bibliotek LFS w podkatalogu Blendera
-    - name: Pull External LFS Libraries
+    # Pobieramy biblioteki bezpośrednio z oficjalnego repozytorium SVN Blendera dla VS2022/x64
+    - name: Checkout SVN External Libraries
       shell: cmd
       run: |
-        cd blender-main\blender
-        git submodule update --init --recursive lib/windows_x64
-        cd lib\windows_x64
-        git lfs pull
+        if not exist "blender-main\blender\lib\windows_x64" mkdir "blender-main\blender\lib\windows_x64"
+        svn checkout https://svn.blender.org/svnroot/bf-blender/trunk/lib/windows_x64 "blender-main\blender\lib\windows_x64" --non-interactive --trust-server-cert-quiet --depth files
+        cd blender-main\blender\lib\windows_x64
+        svn update --non-interactive --trust-server-cert-quiet
 
-    # 3. Modyfikacja kodów źródłowych Twoim skryptem (odpalany z root workspace'a)
     - name: Run Patch and Prepare Files
       shell: cmd
       run: |
         python PrepareFiles\patch_and_compile.py
 
-    # 4. Właściwa kompilacja z wymuszeniem 'y' na zapytania batcha
     - name: Build Blender
       shell: cmd
       working-directory: blender-main/blender
       run: |
-        echo y | make.bat ninja release
+        make.bat ninja release nobuild_update
 
-    # 5. Eksport gotowego bina
     - name: Upload Blender Artifact
       uses: actions/upload-artifact@v4
       with:
