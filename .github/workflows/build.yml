@@ -11,7 +11,7 @@ jobs:
     runs-on: windows-2022
 
     steps:
-    # 1. Pobranie źródeł kodu (bez pobierania automatycznego LFS, żeby nie dociągać uszkodzonych hashy)
+    # 1. Pobranie źródeł kodu
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
@@ -25,9 +25,10 @@ jobs:
     - name: Install Ninja Build Tool
       uses: llvm/actions/install-ninja@main
 
-    # 2. Ręczne, bezpieczne pobranie bibliotek binarnych z pominieciem wadliwych skryptów update
+    # 2. Pobranie bibliotek LFS w podkatalogu blendera
     - name: Download & Pull External Libraries
       shell: cmd
+      working-directory: blender-main/blender
       run: |
         git submodule update --init --recursive lib/windows_x64
         cd lib\windows_x64
@@ -36,13 +37,14 @@ jobs:
     # 3. Wykonanie Twojego patchera przed kompilacją
     - name: Run Patch and Prepare Files
       shell: cmd
+      working-directory: PrepareFiles
       run: |
-        cd PrepareFiles
         python patch_and_compile.py
 
-    # 4. Właściwa kompilacja przez make.bat (używamy silnika Ninja dla szybkości)
+    # 4. Właściwa kompilacja w katalogu, gdzie znajduje się make.bat
     - name: Build Blender
       shell: cmd
+      working-directory: blender-main/blender
       run: |
         make.bat ninja release
 
@@ -51,4 +53,4 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: Blender-MCP-Windows
-        path: ..\build_windows_Release_x64_vc17_Release\bin\Release\**
+        path: blender-main/build_windows_Release_x64_vc17_Release/bin/Release/**
