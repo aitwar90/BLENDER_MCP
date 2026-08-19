@@ -11,7 +11,6 @@ jobs:
     runs-on: windows-2022
 
     steps:
-    # 1. Pobranie źródeł kodu
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
@@ -25,14 +24,7 @@ jobs:
     - name: Install Ninja Build Tool
       uses: llvm/actions/install-ninja@main
 
-    # 2. Prawidłowe pociągnięcie wszystkich plików LFS w CAŁYM repozytorium
-    - name: Pull All Repository LFS Files
-      shell: cmd
-      run: |
-        git lfs install
-        git lfs pull --include="*"
-
-    # 3. Tworzenie folderu i dociągnięcie zewnętrznych bibliotek dla Windowsa
+    # 1. Pobranie bibliotek binarnych pod Windowsa z Git LFS Blendera
     - name: Fetch External Windows Libraries
       shell: cmd
       run: |
@@ -44,20 +36,26 @@ jobs:
         git checkout main
         git lfs pull
 
-    # 4. Modyfikacja źródeł patcherem
+    # 2. Naprawa pliku startup.blend (pobranie prawdziwej binarki z oficjalnego repo Blendera)
+    - name: Fix startup.blend asset
+      shell: cmd
+      run: |
+        curl -L -o blender-main\blender\release\datafiles\startup.blend https://projects.blender.org/blender/blender/raw/branch/main/release/datafiles/startup.blend
+
+    # 3. Modyfikacja kodów źródłowych patcherem
     - name: Run Patch and Prepare Files
       shell: cmd
       run: |
         python PrepareFiles\patch_and_compile.py
 
-    # 5. Właściwa kompilacja
+    # 4. Właściwa kompilacja
     - name: Build Blender
       shell: cmd
       working-directory: blender-main/blender
       run: |
         make.bat ninja release
 
-    # 6. Spakowanie artefaktu
+    # 5. Spakowanie artefaktu
     - name: Upload Blender Artifact
       uses: actions/upload-artifact@v4
       with:
