@@ -24,28 +24,38 @@ jobs:
     - name: Install Ninja Build Tool
       uses: llvm/actions/install-ninja@main
 
-    # Pobieramy biblioteki bezpośrednio z oficjalnego repozytorium SVN Blendera dla VS2022/x64
-    - name: Checkout SVN External Libraries
+    # 1. Pobranie submodułu LFS
+    - name: Pull External LFS Libraries
       shell: cmd
       run: |
-        if not exist "blender-main\blender\lib\windows_x64" mkdir "blender-main\blender\lib\windows_x64"
-        svn checkout https://svn.blender.org/svnroot/bf-blender/trunk/lib/windows_x64 "blender-main\blender\lib\windows_x64" --non-interactive --trust-server-cert-quiet --depth files
-        cd blender-main\blender\lib\windows_x64
-        svn update --non-interactive --trust-server-cert-quiet
+        cd blender-main\blender
+        git submodule update --init --recursive lib/windows_x64
+        cd lib\windows_x64
+        git lfs pull
 
+    # 2. DIAGNOSTYKA: Wypisanie zawartości katalogu bibliotek do logów GH Actions
+    - name: Debug - Inspect Directory Structure
+      shell: cmd
+      run: |
+        echo === SPRAWDZANIE KATALOGU BASE ===
+        cd blender-main\blender
+        cd
+        echo === SPRAWDZANIE KATALOGU LIB ===
+        if exist lib\windows_x64 (
+          dir lib\windows_x64
+        ) else (
+          echo FOLDER lib\windows_x64 NIE ISTNIEJE!
+        )
+
+    # 3. Modyfikacja kodów źródłowych
     - name: Run Patch and Prepare Files
       shell: cmd
       run: |
         python PrepareFiles\patch_and_compile.py
 
+    # 4. Kompilacja
     - name: Build Blender
       shell: cmd
       working-directory: blender-main/blender
       run: |
-        make.bat ninja release nobuild_update
-
-    - name: Upload Blender Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: Blender-MCP-Windows
-        path: blender-main/build_windows_Release_x64_vc17_Release/bin/Release/**
+        make.bat ninja release
