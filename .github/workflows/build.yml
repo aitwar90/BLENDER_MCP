@@ -73,11 +73,12 @@ jobs:
         subst B: "%CD%\blender-main\blender"
         cd /d B:\
         make.bat release
+        subst B: /d
 
     - name: Upload Blender Artifact
       uses: actions/upload-artifact@v4
       with:
         name: Blender-MCP-Windows
         path: |
-          blender-main/build_windows_Release_x64_vc17_Release/bin/Release/*
-          blender-main/build_windows_Release_x64_vc17_Release/bin/*
+          blender-main/blender/build_windows_Release_x64_vc17_Release/bin/Release/*
+          blender-main/blender/build_windows_Release_x64_vc17_Release/bin/*
