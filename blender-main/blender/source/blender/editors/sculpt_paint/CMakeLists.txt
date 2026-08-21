@@ -23,7 +23,6 @@ set(SRC
   brush_asset_ops.cc
   paint_cursor.cc
   paint_curve.cc
-  paint_mcp.cc
   paint_curve_undo.cc
   paint_ops.cc
   paint_sample_color.cc

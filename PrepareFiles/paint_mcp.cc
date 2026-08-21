@@ -97,16 +97,27 @@ extern "C" {
 
 bool mcp_is_enabled(const blender::bContext *C) {
   blender::Scene *scene = nullptr;
-  if (C) {
+
+  if (C != nullptr) {
     scene = CTX_data_scene(C);
-  } else if (blender::G.main) {
+  } 
+  
+  // Jeśli brak kontekstu lub kontekst nie ma sceny, spróbuj pobrać z G.main
+  if (scene == nullptr && blender::G.main != nullptr) {
     scene = static_cast<blender::Scene *>(blender::G.main->scenes.first);
   }
-  if (!scene) return false;
 
-  blender::PointerRNA scene_ptr = blender::RNA_id_pointer_create(&scene->id);
+  // Jeśli scena nadal nie istnieje (np. na wczesnym etapie startu Blendera), bezpiecznie wracamy!
+  if (scene == nullptr) {
+    return false;
+  }
+
+  // Zabezpieczenie RNA
+  blender::PointerRNA scene_ptr = blender::RNA_id_pointer_create(reinterpret_cast<blender::ID *>(scene));
   blender::PropertyRNA *prop = blender::RNA_struct_find_property(&scene_ptr, "use_mcp");
-  if (!prop) return false;
+  if (prop == nullptr) {
+    return false;
+  }
 
   return blender::RNA_property_boolean_get(&scene_ptr, prop);
 }

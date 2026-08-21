@@ -1,18 +1,3 @@
-/* MCP_PATCH_APPLIED */
-#include "BKE_context.hh"
-
-namespace blender {
-struct Image;
-struct Tex;
-}
-
-extern "C" {
-  bool mcp_is_enabled(const blender::bContext *C);
-  void mcp_inject_images(const blender::bContext *C, void *used_images_ptr, int *image_tot_ptr);
-  bool mcp_get_slot_data(
-    int channel_index, int slot_index, blender::Image **out_target_img, blender::Tex **out_source_tex);
-  bool mcp_get_tex_for_image(int channel_index, blender::Image *target_img, blender::Tex **out_source_tex);
-}
 /* SPDX-FileCopyrightText: 2001-2002 NaN Holding BV. All rights reserved.
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
@@ -4688,12 +4673,6 @@ static void project_paint_prepare_all_faces(ProjPaintState *ps,
   }
 
   /* Build an array of images we use. */
-    /* 2. Wstrzykniecie kanalow MCP */
-  if (mcp_is_enabled(nullptr)) {
-    mcp_inject_images(nullptr, &used_images, &ps->image_tot);
-  }
-
-  /* 3. Alokacja buforow dla wszystkich obrazow (w tym MCP) */
   if (ps->is_shared_user == false) {
     project_paint_build_proj_ima(ps, arena, &used_images);
   }
@@ -5784,60 +5763,12 @@ static void do_projectpaint_thread(TaskPool *__restrict /*pool*/, void *ph_v)
                   }
                   break;
                 default:
-                  if (mcp_is_enabled(nullptr) && ps->image_tot > 1) {
-                    const int orig_img_idx = projPixel->image_index;
-                    void *orig_color_pt = projPixel->origColor.ch_pt;
-
-                    float3 samplecos = {projPixel->projCoSS[0], projPixel->projCoSS[1], 0.0f};
-
-                    for (int img_i = 0; img_i < ps->image_tot; img_i++) {
-                      ProjPaintImage *cur_ima = projImages + img_i;
-                      cur_ima->touch = true;
-
-                      const bool cur_is_float = (cur_ima->ibuf->float_data() != nullptr);
-                      projPixel->image_index = img_i;
-
-                      float channel_texrgb[3];
-                      copy_v3_v3(channel_texrgb, texrgb);
-
-                      blender::Tex *source_tex = nullptr;
-                      const int active_chan = 0;
-
-                      if (mcp_get_tex_for_image(active_chan, cur_ima->ima, &source_tex) && source_tex) {
-                        MTex mtex_tmp = {};
-                        mtex_tmp.tex = source_tex;
-                        mtex_tmp.brush_map_mode = MTEX_MAP_MODE_VIEW;
-                        
-                        float4 texrgba;
-                        BKE_brush_sample_tex_3d(ps->paint, brush, &mtex_tmp, samplecos, texrgba, thread_index, pool);
-                        copy_v3_v3(channel_texrgb, texrgba);
-                      }
-
-                      if (cur_is_float) {
-                        projPixel->origColor.f_pt = cur_ima->float_data_mut + projPixel->pixel_offset;
-                        do_projectpaint_draw_f(ps, projPixel, channel_texrgb, mask);
-                      }
-                      else {
-                        projPixel->origColor.ch_pt = cur_ima->byte_data_mut + projPixel->pixel_offset;
-                        do_projectpaint_draw(
-                            ps, projPixel, channel_texrgb, mask, ps->dither, projPixel->x_px, projPixel->y_px);
-                      }
-
-                      ImagePaintPartialRedraw *redraw_cell = cur_ima->partRedrawRect + projPixel->bb_cell_index;
-                      image_paint_partial_redraw_expand(redraw_cell, projPixel);
-                    }
-
-                    projPixel->image_index = orig_img_idx;
-                    projPixel->origColor.ch_pt = static_cast<uint8_t *>(orig_color_pt);
+                  if (is_floatbuf) {
+                    do_projectpaint_draw_f(ps, projPixel, texrgb, mask);
                   }
                   else {
-                    if (is_floatbuf) {
-                      do_projectpaint_draw_f(ps, projPixel, texrgb, mask);
-                    }
-                    else {
-                      do_projectpaint_draw(
-                          ps, projPixel, texrgb, mask, ps->dither, projPixel->x_px, projPixel->y_px);
-                    }
+                    do_projectpaint_draw(
+                        ps, projPixel, texrgb, mask, ps->dither, projPixel->x_px, projPixel->y_px);
                   }
                   break;
               }
